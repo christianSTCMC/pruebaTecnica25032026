@@ -5,12 +5,16 @@ import com.accenture.franquicias.franquicia.application.dto.ConsultaMayorStockPo
 import com.accenture.franquicias.franquicia.application.dto.FranquiciaListado;
 import com.accenture.franquicias.franquicia.application.dto.ProductoMayorStockPorSucursalResultado;
 import com.accenture.franquicias.franquicia.application.dto.SucursalMayorStockPorSucursalResultado;
+import com.accenture.franquicias.franquicia.application.service.ActualizarNombreFranquiciaService;
 import com.accenture.franquicias.franquicia.application.service.ConsultarMayorStockPorSucursalService;
 import com.accenture.franquicias.franquicia.application.service.CrearFranquiciaService;
 import com.accenture.franquicias.franquicia.application.service.ListarFranquiciasService;
+import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.ActualizarNombreFranquiciaRequest;
 import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.CrearFranquiciaRequest;
 import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.FranquiciaResponse;
+import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.ListadoMayorStockPorSucursalResponse;
 import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.MayorStockPorSucursalResponse;
+import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.ProductoMayorStockPorSucursalListadoResponse;
 import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.ProductoMayorStockPorSucursalResponse;
 import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.SucursalMayorStockPorSucursalResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,14 +48,17 @@ import java.util.UUID;
 @Tag(name = "Franquicias", description = "Operaciones para gestionar franquicias y sus consultas agregadas")
 public class FranquiciaController {
 
+    private final ActualizarNombreFranquiciaService actualizarNombreFranquiciaService;
     private final CrearFranquiciaService crearFranquiciaService;
     private final ListarFranquiciasService listarFranquiciasService;
     private final ConsultarMayorStockPorSucursalService consultarMayorStockPorSucursalService;
 
     public FranquiciaController(
+            ActualizarNombreFranquiciaService actualizarNombreFranquiciaService,
             CrearFranquiciaService crearFranquiciaService,
             ListarFranquiciasService listarFranquiciasService,
             ConsultarMayorStockPorSucursalService consultarMayorStockPorSucursalService) {
+        this.actualizarNombreFranquiciaService = actualizarNombreFranquiciaService;
         this.crearFranquiciaService = crearFranquiciaService;
         this.listarFranquiciasService = listarFranquiciasService;
         this.consultarMayorStockPorSucursalService = consultarMayorStockPorSucursalService;
@@ -74,6 +82,11 @@ public class FranquiciaController {
                     responseCode = "400",
                     description = "Solicitud invalida",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Conflicto por nombre de franquicia duplicado",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
     public Mono<ResponseEntity<FranquiciaResponse>> crearFranquicia(
@@ -81,6 +94,43 @@ public class FranquiciaController {
         return crearFranquiciaService.ejecutar(request.nombre())
                 .map(resultado -> ResponseEntity.status(HttpStatus.CREATED)
                         .body(new FranquiciaResponse(resultado.id(), resultado.nombre())));
+    }
+
+    /**
+     * Actualiza el nombre de una franquicia existente.
+     */
+    @PatchMapping(path = "/{franquiciaId}/nombre", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Actualizar nombre de franquicia",
+            description = "Actualiza el nombre de una franquicia existente."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Franquicia actualizada",
+                    content = @Content(schema = @Schema(implementation = FranquiciaResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Solicitud invalida",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Franquicia no encontrada",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Conflicto por nombre de franquicia duplicado",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    public Mono<ResponseEntity<FranquiciaResponse>> actualizarNombreFranquicia(
+            @PathVariable UUID franquiciaId,
+            @Valid @RequestBody ActualizarNombreFranquiciaRequest request) {
+        return actualizarNombreFranquiciaService.ejecutar(franquiciaId, request.nombre())
+                .map(resultado -> ResponseEntity.ok(new FranquiciaResponse(resultado.id(), resultado.nombre())));
     }
 
     /**
@@ -134,6 +184,38 @@ public class FranquiciaController {
                 .map(ResponseEntity::ok);
     }
 
+    /**
+     * Obtiene un listado plano de productos ganadores por sucursal para la franquicia indicada.
+     */
+    @GetMapping("/{franquiciaId}/productos/mayor-stock-por-sucursal/listado")
+    @Operation(
+            summary = "Consultar mayor stock por sucursal (listado plano)",
+            description = "Obtiene el producto con mayor stock por sucursal como listado plano, incluyendo a que sucursal pertenece cada producto."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Consulta procesada correctamente",
+                    content = @Content(schema = @Schema(implementation = ListadoMayorStockPorSucursalResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Identificador de franquicia invalido",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Franquicia no encontrada",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    public Mono<ResponseEntity<ListadoMayorStockPorSucursalResponse>> consultarMayorStockPorSucursalListado(
+            @PathVariable UUID franquiciaId) {
+        return consultarMayorStockPorSucursalService.ejecutar(franquiciaId)
+                .map(this::mapearRespuestaMayorStockListado)
+                .map(ResponseEntity::ok);
+    }
+
     private MayorStockPorSucursalResponse mapearRespuestaMayorStock(
             ConsultaMayorStockPorSucursalResultado resultado) {
         return new MayorStockPorSucursalResponse(
@@ -159,6 +241,30 @@ public class FranquiciaController {
     private ProductoMayorStockPorSucursalResponse mapearProductoMayorStock(
             ProductoMayorStockPorSucursalResultado productoResultado) {
         return new ProductoMayorStockPorSucursalResponse(
+                productoResultado.productoId(),
+                productoResultado.productoNombre(),
+                productoResultado.stock()
+        );
+    }
+
+    private ListadoMayorStockPorSucursalResponse mapearRespuestaMayorStockListado(
+            ConsultaMayorStockPorSucursalResultado resultado) {
+        return new ListadoMayorStockPorSucursalResponse(
+                resultado.franquiciaId(),
+                resultado.franquiciaNombre(),
+                resultado.sucursales().stream()
+                        .flatMap(sucursal -> sucursal.productos().stream()
+                                .map(producto -> mapearProductoMayorStockListado(sucursal, producto)))
+                        .toList()
+        );
+    }
+
+    private ProductoMayorStockPorSucursalListadoResponse mapearProductoMayorStockListado(
+            SucursalMayorStockPorSucursalResultado sucursalResultado,
+            ProductoMayorStockPorSucursalResultado productoResultado) {
+        return new ProductoMayorStockPorSucursalListadoResponse(
+                sucursalResultado.sucursalId(),
+                sucursalResultado.sucursalNombre(),
                 productoResultado.productoId(),
                 productoResultado.productoNombre(),
                 productoResultado.stock()

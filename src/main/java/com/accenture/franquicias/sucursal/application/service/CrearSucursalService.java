@@ -5,6 +5,7 @@ import com.accenture.franquicias.franquicia.infrastructure.output.persistence.re
 import com.accenture.franquicias.sucursal.application.dto.SucursalCreada;
 import com.accenture.franquicias.sucursal.infrastructure.output.persistence.entity.SucursalEntity;
 import com.accenture.franquicias.sucursal.infrastructure.output.persistence.repository.SucursalRepositoryJpa;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -38,12 +39,24 @@ public class CrearSucursalService {
                     FranquiciaEntity franquicia = franquiciaRepository.findById(franquiciaId)
                             .orElseThrow(FranquiciaNoEncontradaException::new);
 
-                    SucursalEntity sucursalGuardada = sucursalRepository.save(new SucursalEntity(nombre, franquicia));
-                    return new SucursalCreada(
-                            sucursalGuardada.getId(),
-                            sucursalGuardada.getNombre(),
-                            franquiciaId
-                    );
+                    String nombreNormalizado = nombre == null ? null : nombre.trim();
+                    if (sucursalRepository.existsByNombre(nombreNormalizado)) {
+                        throw new SucursalDuplicadaException();
+                    }
+
+                    try {
+                        SucursalEntity sucursalGuardada = sucursalRepository.save(
+                                new SucursalEntity(nombreNormalizado, franquicia)
+                        );
+                        return new SucursalCreada(
+                                sucursalGuardada.getId(),
+                                sucursalGuardada.getNombre(),
+                                franquiciaId
+                        );
+                    } catch (DataIntegrityViolationException ex) {
+                        // Se cubre condicion de carrera ante creaciones concurrentes con el mismo nombre.
+                        throw new SucursalDuplicadaException();
+                    }
                 })
                 .subscribeOn(Schedulers.boundedElastic());
     }

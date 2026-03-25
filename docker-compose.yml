@@ -1,14 +1,14 @@
 services:
   mysql:
     image: mysql:8.4
-    container_name: api-franquicias-mysql
+    container_name: ${MYSQL_CONTAINER_NAME:-api-franquicias-mysql}
     environment:
-      MYSQL_DATABASE: franquicias
-      MYSQL_USER: franquicias_user
-      MYSQL_PASSWORD: franquicias_pass
-      MYSQL_ROOT_PASSWORD: franquicias_root
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-franquicias}
+      MYSQL_USER: ${MYSQL_USER:-franquicias_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-franquicias_pass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-franquicias_root}
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -16,6 +16,33 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${APP_CONTAINER_NAME:-api-franquicias-app}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: ${SERVER_PORT:-8080}
+      FRANQUICIAS_DB_JDBC_URL: ${FRANQUICIAS_DB_JDBC_URL:-jdbc:mysql://mysql:3306/franquicias?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+      FRANQUICIAS_DB_USERNAME: ${FRANQUICIAS_DB_USERNAME:-franquicias_user}
+      FRANQUICIAS_DB_PASSWORD: ${FRANQUICIAS_DB_PASSWORD:-franquicias_pass}
+      FRANQUICIAS_FLYWAY_ENABLED: ${FRANQUICIAS_FLYWAY_ENABLED:-true}
+      APP_LOG_LEVEL_ROOT: ${APP_LOG_LEVEL_ROOT:-INFO}
+      APP_LOG_LEVEL_SPRING: ${APP_LOG_LEVEL_SPRING:-INFO}
+      APP_LOG_LEVEL_APP: ${APP_LOG_LEVEL_APP:-INFO}
+      APP_LOG_LEVEL_DB: ${APP_LOG_LEVEL_DB:-WARN}
+      APP_LOGS_PATH: ${APP_LOGS_PATH:-/app/logs}
+    ports:
+      - "${APP_PORT:-8080}:${SERVER_PORT:-8080}"
+    volumes:
+      - app_logs:/app/logs
+    restart: unless-stopped
 
 volumes:
   mysql_data:
+  app_logs:

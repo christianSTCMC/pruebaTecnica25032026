@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
+import org.springframework.web.reactive.resource.NoResourceFoundException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -69,6 +70,35 @@ class GlobalExceptionHandlerTest {
                         "Bad Request",
                         "El stock no puede ser negativo",
                         "/api/v1/productos"
+                );
+        assertThat(respuesta.getBody().timestamp()).isNotNull();
+    }
+
+    @Test
+    void debeRetornar404CuandoLaRutaNoExiste() {
+        MockServerWebExchange exchange = MockServerWebExchange.from(
+                MockServerHttpRequest.get("/api/v1/ruta-inexistente").build()
+        );
+
+        ResponseEntity<ApiErrorResponse> respuesta = globalExceptionHandler.manejarRutaNoEncontrada(
+                new NoResourceFoundException("/api/v1/ruta-inexistente"),
+                exchange
+        );
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(respuesta.getBody())
+                .isNotNull()
+                .extracting(
+                        ApiErrorResponse::status,
+                        ApiErrorResponse::error,
+                        ApiErrorResponse::message,
+                        ApiErrorResponse::path
+                )
+                .containsExactly(
+                        404,
+                        "Not Found",
+                        "Recurso no encontrado",
+                        "/api/v1/ruta-inexistente"
                 );
         assertThat(respuesta.getBody().timestamp()).isNotNull();
     }

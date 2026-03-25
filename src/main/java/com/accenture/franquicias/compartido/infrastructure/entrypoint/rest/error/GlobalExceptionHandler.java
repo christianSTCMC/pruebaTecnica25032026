@@ -1,10 +1,12 @@
 package com.accenture.franquicias.compartido.infrastructure.entrypoint.rest.error;
 
+import com.accenture.franquicias.franquicia.application.service.FranquiciaDuplicadaException;
 import com.accenture.franquicias.producto.application.service.ProductoDuplicadoEnSucursalException;
 import com.accenture.franquicias.producto.application.service.ProductoNoEncontradoException;
 import com.accenture.franquicias.producto.application.service.ProductoNoPerteneceASucursalException;
-import com.accenture.franquicias.producto.application.service.SucursalNoEncontradaException;
 import com.accenture.franquicias.sucursal.application.service.FranquiciaNoEncontradaException;
+import com.accenture.franquicias.sucursal.application.service.SucursalDuplicadaException;
+import com.accenture.franquicias.sucursal.application.service.SucursalNoEncontradaException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.reactive.resource.NoResourceFoundException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.bind.support.WebExchangeBindException;
@@ -72,6 +75,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler({
             FranquiciaNoEncontradaException.class,
+            com.accenture.franquicias.producto.application.service.SucursalNoEncontradaException.class,
             SucursalNoEncontradaException.class,
             ProductoNoEncontradoException.class
     })
@@ -85,6 +89,8 @@ public class GlobalExceptionHandler {
      * Maneja conflictos de negocio como duplicidad o pertenencia invalida.
      */
     @ExceptionHandler({
+            FranquiciaDuplicadaException.class,
+            SucursalDuplicadaException.class,
             ProductoDuplicadoEnSucursalException.class,
             ProductoNoPerteneceASucursalException.class
     })
@@ -92,6 +98,16 @@ public class GlobalExceptionHandler {
             RuntimeException ex,
             ServerWebExchange exchange) {
         return construirRespuesta(HttpStatus.CONFLICT, ex.getMessage(), exchange);
+    }
+
+    /**
+     * Maneja rutas inexistentes para evitar reportarlas como error interno.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiErrorResponse> manejarRutaNoEncontrada(
+            NoResourceFoundException ex,
+            ServerWebExchange exchange) {
+        return construirRespuesta(HttpStatus.NOT_FOUND, "Recurso no encontrado", exchange);
     }
 
     /**

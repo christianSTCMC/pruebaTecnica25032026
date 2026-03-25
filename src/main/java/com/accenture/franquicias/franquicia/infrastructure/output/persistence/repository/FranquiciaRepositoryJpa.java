@@ -15,4 +15,14 @@ public interface FranquiciaRepositoryJpa extends JpaRepository<FranquiciaEntity,
      * Retorna franquicias ordenadas por nombre para respuestas deterministas.
      */
     List<FranquiciaEntity> findAllByOrderByNombreAsc();
+
+    /**
+     * Permite validar duplicidad de nombre de franquicia en creacion.
+     */
+    boolean existsByNombre(String nombre);
+
+    /**
+     * Permite validar duplicidad de nombre excluyendo la franquicia actual.
+     */
+    boolean existsByNombreAndIdNot(String nombre, UUID franquiciaId);
 }

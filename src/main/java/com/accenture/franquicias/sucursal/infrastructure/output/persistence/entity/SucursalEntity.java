@@ -13,6 +13,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -27,7 +28,12 @@ import java.util.UUID;
  * una sucursal siempre pertenece a una sola franquicia.</p>
  */
 @Entity
-@Table(name = "sucursales")
+@Table(
+        name = "sucursales",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_sucursales_nombre", columnNames = {"nombre"})
+        }
+)
 public class SucursalEntity extends EntidadAuditada {
 
     @Id

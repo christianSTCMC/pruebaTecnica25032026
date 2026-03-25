@@ -2,8 +2,10 @@ package com.accenture.franquicias.sucursal.infrastructure.entrypoint.rest;
 
 import com.accenture.franquicias.compartido.infrastructure.entrypoint.rest.error.ApiErrorResponse;
 import com.accenture.franquicias.sucursal.application.dto.SucursalListado;
+import com.accenture.franquicias.sucursal.application.service.ActualizarNombreSucursalService;
 import com.accenture.franquicias.sucursal.application.service.CrearSucursalService;
 import com.accenture.franquicias.sucursal.application.service.ListarSucursalesService;
+import com.accenture.franquicias.sucursal.infrastructure.entrypoint.rest.dto.ActualizarNombreSucursalRequest;
 import com.accenture.franquicias.sucursal.infrastructure.entrypoint.rest.dto.CrearSucursalRequest;
 import com.accenture.franquicias.sucursal.infrastructure.entrypoint.rest.dto.SucursalResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,12 +39,15 @@ import java.util.UUID;
 @Tag(name = "Sucursales", description = "Operaciones para gestionar sucursales")
 public class SucursalController {
 
+    private final ActualizarNombreSucursalService actualizarNombreSucursalService;
     private final CrearSucursalService crearSucursalService;
     private final ListarSucursalesService listarSucursalesService;
 
     public SucursalController(
+            ActualizarNombreSucursalService actualizarNombreSucursalService,
             CrearSucursalService crearSucursalService,
             ListarSucursalesService listarSucursalesService) {
+        this.actualizarNombreSucursalService = actualizarNombreSucursalService;
         this.crearSucursalService = crearSucursalService;
         this.listarSucursalesService = listarSucursalesService;
     }
@@ -69,6 +75,11 @@ public class SucursalController {
                     responseCode = "404",
                     description = "Franquicia no encontrada",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Conflicto por nombre de sucursal duplicado",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
     public Mono<ResponseEntity<SucursalResponse>> crearSucursal(
@@ -77,6 +88,44 @@ public class SucursalController {
         return crearSucursalService.ejecutar(franquiciaId, request.nombre())
                 .map(resultado -> ResponseEntity.status(HttpStatus.CREATED)
                         .body(new SucursalResponse(resultado.id(), resultado.nombre(), resultado.franquiciaId())));
+    }
+
+    /**
+     * Actualiza el nombre de la sucursal indicada.
+     */
+    @PatchMapping(path = "/sucursales/{sucursalId}/nombre", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Actualizar nombre de sucursal",
+            description = "Actualiza el nombre de una sucursal existente."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Sucursal actualizada",
+                    content = @Content(schema = @Schema(implementation = SucursalResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Solicitud invalida",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Sucursal no encontrada",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Conflicto por nombre de sucursal duplicado",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    public Mono<ResponseEntity<SucursalResponse>> actualizarNombreSucursal(
+            @PathVariable UUID sucursalId,
+            @Valid @RequestBody ActualizarNombreSucursalRequest request) {
+        return actualizarNombreSucursalService.ejecutar(sucursalId, request.nombre())
+                .map(resultado -> ResponseEntity.ok(
+                        new SucursalResponse(resultado.id(), resultado.nombre(), resultado.franquiciaId())));
     }
 
     /**

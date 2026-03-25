@@ -20,4 +20,14 @@ public interface SucursalRepositoryJpa extends JpaRepository<SucursalEntity, UUI
      * Retorna sucursales ordenadas por nombre para exponer respuestas deterministas.
      */
     List<SucursalEntity> findByFranquicia_IdOrderByNombreAsc(UUID franquiciaId);
+
+    /**
+     * Permite validar duplicidad de nombre de sucursal en creacion.
+     */
+    boolean existsByNombre(String nombre);
+
+    /**
+     * Permite validar duplicidad de nombre excluyendo la sucursal actual.
+     */
+    boolean existsByNombreAndIdNot(String nombre, UUID sucursalId);
 }

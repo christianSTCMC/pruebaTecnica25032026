@@ -10,6 +10,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.LinkedHashSet;
@@ -23,7 +24,12 @@ import java.util.UUID;
  * sucursales bajo un mismo identificador de negocio.</p>
  */
 @Entity
-@Table(name = "franquicias")
+@Table(
+        name = "franquicias",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_franquicias_nombre", columnNames = {"nombre"})
+        }
+)
 public class FranquiciaEntity extends EntidadAuditada {
 
     @Id

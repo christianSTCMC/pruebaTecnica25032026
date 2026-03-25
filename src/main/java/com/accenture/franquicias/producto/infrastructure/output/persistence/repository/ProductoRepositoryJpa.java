@@ -25,6 +25,11 @@ public interface ProductoRepositoryJpa extends JpaRepository<ProductoEntity, UUI
     boolean existsBySucursal_IdAndNombre(UUID sucursalId, String nombre);
 
     /**
+     * Valida duplicidad de nombre dentro de la sucursal excluyendo el producto actual.
+     */
+    boolean existsBySucursal_IdAndNombreAndIdNot(UUID sucursalId, String nombre, UUID productoId);
+
+    /**
      * Se usa para validar pertenencia del producto a la sucursal durante eliminacion.
      */
     boolean existsByIdAndSucursal_Id(UUID productoId, UUID sucursalId);

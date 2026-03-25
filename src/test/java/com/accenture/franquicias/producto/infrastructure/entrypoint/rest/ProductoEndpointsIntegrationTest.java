@@ -279,7 +279,10 @@ class ProductoEndpointsIntegrationTest {
     }
 
     private SucursalEntity crearSucursal(String nombreFranquicia, String nombreSucursal) {
-        FranquiciaEntity franquicia = franquiciaRepository.saveAndFlush(new FranquiciaEntity(nombreFranquicia));
+        // Se hace unico el nombre de franquicia para evitar colisiones al crear varias sucursales en pruebas.
+        FranquiciaEntity franquicia = franquiciaRepository.saveAndFlush(
+                new FranquiciaEntity(nombreFranquicia + " " + UUID.randomUUID())
+        );
         return sucursalRepository.saveAndFlush(new SucursalEntity(nombreSucursal, franquicia));
     }
 }

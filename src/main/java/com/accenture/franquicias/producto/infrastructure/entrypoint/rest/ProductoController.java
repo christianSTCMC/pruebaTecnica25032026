@@ -3,10 +3,12 @@ package com.accenture.franquicias.producto.infrastructure.entrypoint.rest;
 import com.accenture.franquicias.compartido.infrastructure.entrypoint.rest.error.ApiErrorResponse;
 import com.accenture.franquicias.producto.application.dto.ProductoListado;
 import com.accenture.franquicias.producto.application.dto.ProductoResultado;
+import com.accenture.franquicias.producto.application.service.ActualizarNombreProductoService;
 import com.accenture.franquicias.producto.application.service.ActualizarStockProductoService;
 import com.accenture.franquicias.producto.application.service.CrearProductoService;
 import com.accenture.franquicias.producto.application.service.EliminarProductoService;
 import com.accenture.franquicias.producto.application.service.ListarProductosService;
+import com.accenture.franquicias.producto.infrastructure.entrypoint.rest.dto.ActualizarNombreProductoRequest;
 import com.accenture.franquicias.producto.infrastructure.entrypoint.rest.dto.ActualizarStockProductoRequest;
 import com.accenture.franquicias.producto.infrastructure.entrypoint.rest.dto.CrearProductoRequest;
 import com.accenture.franquicias.producto.infrastructure.entrypoint.rest.dto.ProductoResponse;
@@ -44,16 +46,19 @@ public class ProductoController {
 
     private final CrearProductoService crearProductoService;
     private final EliminarProductoService eliminarProductoService;
+    private final ActualizarNombreProductoService actualizarNombreProductoService;
     private final ActualizarStockProductoService actualizarStockProductoService;
     private final ListarProductosService listarProductosService;
 
     public ProductoController(
             CrearProductoService crearProductoService,
             EliminarProductoService eliminarProductoService,
+            ActualizarNombreProductoService actualizarNombreProductoService,
             ActualizarStockProductoService actualizarStockProductoService,
             ListarProductosService listarProductosService) {
         this.crearProductoService = crearProductoService;
         this.eliminarProductoService = eliminarProductoService;
+        this.actualizarNombreProductoService = actualizarNombreProductoService;
         this.actualizarStockProductoService = actualizarStockProductoService;
         this.listarProductosService = listarProductosService;
     }
@@ -157,6 +162,43 @@ public class ProductoController {
             @PathVariable UUID productoId,
             @Valid @RequestBody ActualizarStockProductoRequest request) {
         return actualizarStockProductoService.ejecutar(productoId, request.stock())
+                .map(resultado -> ResponseEntity.ok(mapearRespuesta(resultado)));
+    }
+
+    /**
+     * Modifica el nombre del producto indicado.
+     */
+    @PatchMapping(path = "/productos/{productoId}/nombre", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Actualizar nombre de producto",
+            description = "Actualiza el nombre de un producto validando que no se repita en su sucursal."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Nombre actualizado",
+                    content = @Content(schema = @Schema(implementation = ProductoResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Solicitud invalida",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Producto no encontrado",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Conflicto de negocio por duplicidad",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    public Mono<ResponseEntity<ProductoResponse>> actualizarNombre(
+            @PathVariable UUID productoId,
+            @Valid @RequestBody ActualizarNombreProductoRequest request) {
+        return actualizarNombreProductoService.ejecutar(productoId, request.nombre())
                 .map(resultado -> ResponseEntity.ok(mapearRespuesta(resultado)));
     }
 

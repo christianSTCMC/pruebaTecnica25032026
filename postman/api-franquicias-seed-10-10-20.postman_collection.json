@@ -1543,6 +1543,120 @@
           }
         }
       ]
+    },
+    {
+      "name": "04 - Actualizar Nombres (Nuevos Servicios)",
+      "description": "Ejecutar despues del seed para validar los endpoints de actualizacion de nombre en franquicia, sucursal y producto.",
+      "item": [
+        {
+          "name": "Actualizar Nombre Franquicia 01",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Franquicia 01 Renombrada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/v1/franquicias/{{franquiciaId01}}/nombre",
+            "description": "Actualiza el nombre de la franquicia creada en el paso 01."
+          }
+        },
+        {
+          "name": "Actualizar Nombre Sucursal 01",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sucursal 01 Renombrada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/v1/sucursales/{{sucursalId01}}/nombre",
+            "description": "Actualiza el nombre de la sucursal creada en el paso 02."
+          }
+        },
+        {
+          "name": "Actualizar Nombre Producto 01",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Producto S01-01 Renombrado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/v1/productos/{{productoId01}}/nombre",
+            "description": "Actualiza el nombre del producto creado en el paso 03."
+          }
+        }
+      ]
     }
   ],
   "variable": [

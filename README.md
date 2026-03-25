@@ -1,218 +1,249 @@
 # API de Franquicias
 
-## Objetivo
+Servicio backend para gestionar franquicias, sucursales y productos, incluyendo la consulta del producto con mayor stock por sucursal para una franquicia específica.
 
-Construir un API REST en `Spring Boot` para administrar franquicias, sus sucursales y los productos ofertados en cada sucursal, incluyendo la consulta del producto con mayor stock por sucursal para una franquicia puntual.
+## Estado actual del proyecto
 
-## Problema de negocio
+Fecha de corte documentada: **25 de marzo de 2026**.
 
-Una franquicia se compone de:
+- Arquitectura backend implementada con `Spring Boot 3.5.12` y `Java 21`.
+- Capa HTTP reactiva con `Spring WebFlux`.
+- Persistencia relacional con `Spring Data JPA` + `MySQL`.
+- Migraciones versionadas con `Flyway`.
+- Contrato OpenAPI publicado con `springdoc-openapi`.
+- Logging estructurado con separación por categorías (`backend-api`, `db`, `error`).
+- Suite de pruebas verificada en esta fecha: **45 pruebas, 0 fallas, 0 errores**.
 
-- Un `nombre`
-- Un listado de `sucursales`
+## Alcance funcional implementado
 
-Una sucursal se compone de:
+Se encuentran implementados los criterios funcionales del reto para gestión de franquicias, sucursales y productos:
 
-- Un `nombre`
-- Un listado de `productos`
+- Crear franquicia.
+- Actualizar nombre de franquicia.
+- Crear sucursal en una franquicia.
+- Actualizar nombre de sucursal.
+- Crear producto en una sucursal.
+- Actualizar nombre de producto.
+- Eliminar producto de una sucursal.
+- Actualizar stock de producto.
+- Consultar mayor stock por sucursal para una franquicia.
+- Consultar mayor stock por sucursal para una franquicia en formato de listado plano.
+- Listados independientes adicionales de franquicias, sucursales y productos.
 
-Un producto se compone de:
-
-- Un `nombre`
-- Una `cantidad de stock`
-
-## Criterios de aceptación
-
-1. El proyecto debe ser desarrollado en `Spring Boot`.
-2. Exponer un endpoint para agregar una nueva franquicia.
-3. Exponer un endpoint para agregar una nueva sucursal a una franquicia.
-4. Exponer un endpoint para agregar un nuevo producto a una sucursal.
-5. Exponer un endpoint para eliminar un producto de una sucursal.
-6. Exponer un endpoint para modificar el stock de un producto.
-7. Exponer un endpoint para mostrar cuál es el producto con más stock por sucursal dentro de una franquicia puntual.
-8. Utilizar un sistema de persistencia como `Redis`, `MySQL`, `MongoDB` o `DynamoDB` en algún proveedor de nube.
-
-## Propuesta técnica documentada
-
-Para reducir ambigüedad antes de escribir código, esta documentación asume la siguiente base técnica:
-
-- `Java 21`
-- `Spring Boot 3.x`
-- `Spring Web`
-- `Spring Data JPA`
-- `Spring Validation`
-- `MySQL 8` como base de datos principal
-- `springdoc-openapi` para documentación de endpoints
-- `Docker Compose` para levantar dependencias locales
-
-- `Java 21`
-- `Spring Boot 3.5.x`
-- `Spring WebFlux` para capa HTTP
-- `Spring Data JPA` para persistencia relacional
-- `Spring Validation`
-- `MySQL 8`
-- `Flyway` habilitado con migraciones reales
-- `springdoc-openapi` para Swagger UI
-- `Maven Wrapper`
-- `Docker Compose` para MySQL
-
-> Nota técnica: la entrada HTTP se mantiene en `WebFlux`, mientras la persistencia del MVP usa `JPA` para modelado relacional y restricciones de integridad en base de datos.
-
-## Decisión de persistencia
-
-Se propone `MySQL` como persistencia principal porque:
-
-- El dominio es claramente relacional: una franquicia tiene muchas sucursales y una sucursal tiene muchos productos.
-- La consulta de producto con mayor stock por sucursal se resuelve bien con SQL.
-- Permite un camino simple desde desarrollo local hasta despliegue en nube con `AWS RDS`, `Cloud SQL` o `Azure Database for MySQL`.
-
-## Alcance funcional inicial
-
-El MVP documentado contempla:
-
-- Crear franquicias
-- Crear sucursales dentro de una franquicia
-- Crear productos dentro de una sucursal
-- Eliminar productos de una sucursal
-- Actualizar stock de un producto
-- Consultar el producto de mayor stock por sucursal para una franquicia dada
-
-## Resumen de endpoints esperados
+### Endpoints disponibles actualmente
 
 - `POST /api/v1/franquicias`
+- `GET /api/v1/franquicias`
+- `PATCH /api/v1/franquicias/{franquiciaId}/nombre`
 - `POST /api/v1/franquicias/{franquiciaId}/sucursales`
+- `PATCH /api/v1/sucursales/{sucursalId}/nombre`
+- `GET /api/v1/sucursales`
 - `POST /api/v1/sucursales/{sucursalId}/productos`
+- `GET /api/v1/productos`
+- `PATCH /api/v1/productos/{productoId}/nombre`
 - `DELETE /api/v1/sucursales/{sucursalId}/productos/{productoId}`
 - `PATCH /api/v1/productos/{productoId}/stock`
 - `GET /api/v1/franquicias/{franquiciaId}/productos/mayor-stock-por-sucursal`
+- `GET /api/v1/franquicias/{franquiciaId}/productos/mayor-stock-por-sucursal/listado`
 
-## Reglas funcionales documentadas
+## Despliegue rápido
 
-- El `stock` no puede ser negativo.
-- El `nombre` de una franquicia es obligatorio.
-- El `nombre` de una sucursal es obligatorio.
-- El `nombre` de un producto es obligatorio.
-- Una sucursal pertenece a una sola franquicia.
-- Un producto pertenece a una sola sucursal.
-- Dentro de una misma sucursal no debe repetirse el nombre del producto.
-- Si dos productos tienen el mismo stock máximo en una sucursal, se elige el de nombre alfabéticamente menor para garantizar respuesta determinística.
+### Paso extra (solo si Flyway está desactivado): generar la base de datos con scripts SQL
 
-## Documentación del proyecto
+**IMPORTANTE:** este paso manual aplica únicamente si `FRANQUICIAS_FLYWAY_ENABLED=false`.  
+Si `FRANQUICIAS_FLYWAY_ENABLED=true` (valor por default), Flyway ejecuta las migraciones automáticamente al iniciar la API.
 
-La documentación para implementar el proyecto en fases quedó organizada así:
+Cuando se haga manual, ejecuta las migraciones ubicadas en `src/main/resources/db/migration` respetando el orden por versión (`V1`, `V2`, ...).
 
-- [Requerimientos y Arquitectura](DOCS/01-requerimientos-y-arquitectura.md)
-- [Contrato Base del API](DOCS/02-contrato-api.md)
-- [Plan de Implementación por Fases](DOCS/03-plan-implementacion-por-fases.md)
-- [Prompts para IA por Fase](DOCS/04-prompts-ia-por-fase.md)
-
-## Estructura actual del proyecto
-
-```text
-.
-├── docker-compose.yml
-├── mvnw
-├── mvnw.cmd
-├── pom.xml
-├── src
-│   ├── main
-│   │   ├── java/com/accenture/franquicias
-│   │   │   ├── ApiFranquiciasApplication.java
-│   │   │   ├── compartido/
-│   │   │   │   ├── application/
-│   │   │   │   ├── domain/
-│   │   │   │   └── infrastructure/
-│   │   │   │       ├── config/OpenApiConfig.java
-│   │   │   │       ├── logging/
-│   │   │   │       └── persistence/EntidadAuditada.java
-│   │   │   ├── franquicia/
-│   │   │   │   ├── application/port/{in,out}/
-│   │   │   │   ├── domain/
-│   │   │   │   └── infrastructure/output/persistence/
-│   │   │   │       ├── entity/FranquiciaEntity.java
-│   │   │   │       └── repository/FranquiciaRepositoryJpa.java
-│   │   │   ├── producto/
-│   │   │   │   ├── application/port/{in,out}/
-│   │   │   │   ├── domain/
-│   │   │   │   └── infrastructure/output/persistence/
-│   │   │   │       ├── entity/ProductoEntity.java
-│   │   │   │       └── repository/ProductoRepositoryJpa.java
-│   │   │   └── sucursal/
-│   │   │       ├── application/port/{in,out}/
-│   │   │       ├── domain/
-│   │   │       └── infrastructure/output/persistence/
-│   │   │           ├── entity/SucursalEntity.java
-│   │   │           └── repository/SucursalRepositoryJpa.java
-│   │   └── resources
-│   │       ├── application.yml
-│   │       ├── db/migration/V1__crear_esquema_inicial_franquicias.sql
-│   │       └── logback-spring.xml
-│   └── test
-│       ├── java/com/accenture/franquicias/ApiFranquiciasApplicationTests.java
-│       ├── java/com/accenture/franquicias/compartido/infrastructure/logging/RequestLoggingFilterIntegrationTest.java
-│       ├── java/com/accenture/franquicias/producto/infrastructure/output/persistence/repository/ProductoRepositoryJpaIntegrationTest.java
-│       └── resources/application.yml
-└── DOCS
-    ├── 01-requerimientos-y-arquitectura.md
-    ├── 02-contrato-api.md
-    ├── 03-plan-implementacion-por-fases.md
-    └── 04-prompts-ia-por-fase.md
+```bash
+ls -1 src/main/resources/db/migration/V*.sql
 ```
 
-### Criterio de organización
+#### Aclaración clave: ¿JPA crea las tablas?
 
-- `compartido`: piezas transversales como configuración base.
-- `franquicia`, `sucursal` y `producto`: módulos por contexto funcional.
-- `domain`: reglas puras del dominio.
-- `application`: casos de uso y puertos.
-- `infrastructure`: adaptadores HTTP y persistencia.
+- **No.** En este proyecto JPA está configurado con `spring.jpa.hibernate.ddl-auto=validate`, por lo que **solo valida** el esquema existente y no crea tablas.
+- La creación automática del esquema la hace **Flyway**, no JPA.
+- Por defecto, Flyway está activo con `FRANQUICIAS_FLYWAY_ENABLED=true` (default en `application.yml` y en `.env.template` para Docker).
+- En este README se prioriza ejecutarlo manualmente como primer paso para tener control explícito del proceso.
 
-## Cómo validar Fase 1
+#### Aclaración clave: `.env` vs `.env.template`
 
-1. Levantar MySQL local:
+- `.env.template` es la **plantilla versionada** de variables de entorno.
+- `.env` es el archivo **local efectivo** que `docker compose` lee automáticamente al levantar servicios.
+- `.env` no debe versionarse en git (se ignora en `.gitignore`).
+- Flujo recomendado: copiar plantilla y editar valores locales.
 
-   ```bash
-   docker compose up -d
-   ```
+#### Opción A: MySQL local (manual)
 
-2. Ejecutar pruebas:
+1. Crear base y usuario (si aún no existen):
 
-   ```bash
-   ./mvnw test
-   ```
+```bash
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS franquicias; CREATE USER IF NOT EXISTS 'franquicias_user'@'%' IDENTIFIED BY 'franquicias_pass'; GRANT ALL PRIVILEGES ON franquicias.* TO 'franquicias_user'@'%'; FLUSH PRIVILEGES;"
+```
 
-3. Levantar la aplicación (Flyway ejecuta la migración inicial):
+2. Ejecutar scripts en orden:
 
-   ```bash
-   ./mvnw spring-boot:run
-   ```
+```bash
+mysql -h 127.0.0.1 -P 3306 -u franquicias_user -p franquicias < src/main/resources/db/migration/V1__crear_esquema_inicial_franquicias.sql
+mysql -h 127.0.0.1 -P 3306 -u franquicias_user -p franquicias < src/main/resources/db/migration/V2__agregar_unicidad_nombres_franquicia_sucursal.sql
+```
 
-4. Abrir Swagger UI:
+3. Verificar tablas creadas:
 
-   ```text
-   http://localhost:8080/swagger-ui.html
-   ```
+```bash
+mysql -h 127.0.0.1 -P 3306 -u franquicias_user -p -D franquicias -e "SHOW TABLES;"
+```
 
-5. Consultar OpenAPI:
+#### Opción B: MySQL en Docker (manual)
 
-   ```text
-   http://localhost:8080/v3/api-docs
-   ```
+1. Crear `.env` desde la plantilla y levantar solo MySQL:
 
-> Nota: para compilar necesitas un `JDK 21` completo, no solo un `JRE`.
+```bash
+cp .env.template .env
+docker compose up -d mysql
+```
 
-## Estado actual
+2. Ejecutar scripts en orden dentro del contenedor:
 
+```bash
+docker compose exec -T mysql sh -lc 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' < src/main/resources/db/migration/V1__crear_esquema_inicial_franquicias.sql
+docker compose exec -T mysql sh -lc 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' < src/main/resources/db/migration/V2__agregar_unicidad_nombres_franquicia_sucursal.sql
+```
 
-- Se mantiene `Spring Boot` con `Maven Wrapper`.
-- Se habilitó persistencia relacional con `Spring Data JPA` + `MySQL`.
-- Se modelaron entidades `Franquicia`, `Sucursal` y `Producto` con `UUID`.
-- Se configuraron relaciones y repositorios de persistencia por módulo.
-- Se agregó migración `Flyway` con restricciones de negocio:
-  - `stock >= 0`
-  - unicidad de producto por sucursal (`UNIQUE(sucursal_id, nombre)`)
-  - llaves foráneas entre `franquicias`, `sucursales` y `productos`
-- Se mantuvo `OpenAPI/Swagger` y logging base.
+3. Verificar tablas creadas:
 
+```bash
+docker compose exec -T mysql sh -lc 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" -e "SHOW TABLES;"'
+```
 
+### Paso 2: iniciar la API
 
+Configuración recomendada según el flujo que elijas:
+
+- Si ya corriste los scripts manualmente, define `FRANQUICIAS_FLYWAY_ENABLED=false` para evitar que Flyway intente recrear objetos existentes.
+- Si no corriste scripts manuales, deja `FRANQUICIAS_FLYWAY_ENABLED=true` (valor por default) para que Flyway los ejecute automáticamente al iniciar la aplicación.
+
+### Local (sin Docker)
+
+1. Exportar variables de conexión:
+   - `FRANQUICIAS_DB_JDBC_URL`
+   - `FRANQUICIAS_DB_USERNAME`
+   - `FRANQUICIAS_DB_PASSWORD`
+   - `FRANQUICIAS_FLYWAY_ENABLED=true` (default)  
+     Si ya ejecutaste los `.sql` manualmente, usa `FRANQUICIAS_FLYWAY_ENABLED=false`.
+2. Ejecutar:
+
+```bash
+./mvnw spring-boot:run
+```
+
+### Con Docker
+
+1. En `.env`, dejar esta variable según el flujo:
+   - `FRANQUICIAS_FLYWAY_ENABLED=true` (default) para ejecución automática con Flyway.
+   - `FRANQUICIAS_FLYWAY_ENABLED=false` si ya ejecutaste los `.sql` manualmente.
+2. Levantar servicios:
+
+```bash
+docker compose up -d --build
+```
+
+3. Verificar:
+   - Swagger UI: `http://localhost:8080/swagger-ui.html`
+   - OpenAPI: `http://localhost:8080/v3/api-docs`
+
+## Ejecutar pruebas
+
+Las pruebas usan H2 en memoria en entorno de test (`src/test/resources/application.yml`), por lo que no requieren MySQL local para correr.
+
+```bash
+./mvnw test
+```
+
+Reportes generados por Maven Surefire:
+
+- `target/surefire-reports/`
+
+## Probar API con Postman
+
+### Colecciones disponibles
+
+- `postman/api-franquicias-seed-10-10-20.postman_collection.json`
+- `postman/api-franquicias.postman_collection.json`
+
+### Uso recomendado en Postman Desktop
+
+1. Levantar la API en `http://localhost:8080`.
+2. Importar ambas colecciones.
+3. En cada colección, validar variable `baseUrl=http://localhost:8080`.
+4. Ejecutar primero la colección de seed en este orden de carpetas:
+   - `01 - Seed Franquicias (10)`
+   - `02 - Seed Sucursales (10)`
+   - `03 - Seed Productos (20)`
+   - `04 - Actualizar Nombres (Nuevos Servicios)` (opcional)
+5. Luego usar la colección funcional `api-franquicias.postman_collection.json`.
+
+> Nota: en la colección funcional los IDs (`franquiciaId`, `sucursalId`, `productoId`) traen valores de ejemplo; reemplázalos por IDs reales creados en tu ejecución.
+
+### Ejecución opcional por CLI con Newman
+
+```bash
+newman run postman/api-franquicias-seed-10-10-20.postman_collection.json --env-var baseUrl=http://localhost:8080
+newman run postman/api-franquicias.postman_collection.json --env-var baseUrl=http://localhost:8080 --env-var franquiciaId=<UUID_REAL> --env-var sucursalId=<UUID_REAL> --env-var productoId=<UUID_REAL>
+```
+
+## Arquitectura implementada
+
+El proyecto está organizado por contexto funcional (`franquicia`, `sucursal`, `producto`, `compartido`) y por capas tipo Clean Architecture:
+
+- `domain`: núcleo del dominio por contexto.
+- `application`: casos de uso y DTOs de aplicación.
+- `infrastructure/entrypoint/rest`: controladores HTTP y DTOs públicos.
+- `infrastructure/output/persistence`: entidades y repositorios JPA.
+
+Decisión técnica relevante:
+
+- La entrada HTTP es reactiva (`Mono` en controladores y servicios).
+- Como JPA es bloqueante, las operaciones de persistencia se encapsulan en `Schedulers.boundedElastic()` para evitar bloquear el event loop de WebFlux.
+
+## Reglas funcionales y de consistencia
+
+- `nombre` es obligatorio para franquicia, sucursal y producto.
+- `stock` debe ser mayor o igual a `0`.
+- Un producto pertenece a una única sucursal.
+- Una sucursal pertenece a una única franquicia.
+- No se permiten franquicias con nombre duplicado.
+- No se permiten sucursales con nombre duplicado.
+- No se permiten productos duplicados por `(sucursal_id, nombre)`.
+- En empate de stock máximo por sucursal, se selecciona el producto con nombre alfabéticamente menor.
+- En la consulta agregada solo se listan sucursales que tienen productos.
+
+Estas reglas están reforzadas en validaciones de entrada, lógica de aplicación y restricciones de base de datos.
+
+## Manejo de errores y observabilidad
+
+- Formato homogéneo de error (`ApiErrorResponse`) para respuestas `4xx/5xx`.
+- Mapeo de negocio principal:
+  - `400`: validación/entrada inválida.
+  - `404`: recurso no encontrado.
+  - `409`: conflictos de negocio.
+  - `500`: error interno no controlado.
+- `RequestLoggingFilter` propaga/genera `X-Request-Id` y registra método, ruta, estado y latencia.
+
+## Documentación técnica detallada
+
+- [Requerimientos y arquitectura](DOCS/01-requerimientos-y-arquitectura.md)
+- [Contrato API](DOCS/02-contrato-api.md)
+- [Despliegue local y Docker](DOCS/05-despliegue-local-y-docker.md)
+- [Estado técnico y calidad](DOCS/estado-actual-y-calidad.md)
+
+## Artefactos del proyecto
+
+- Colección Postman funcional: `postman/api-franquicias.postman_collection.json`
+- Colección Postman para carga de datos: `postman/api-franquicias-seed-10-10-20.postman_collection.json`
+- Migración base de esquema: `src/main/resources/db/migration/V1__crear_esquema_inicial_franquicias.sql`
+
+## Brechas conocidas del estado actual
+
+- La persistencia productiva en proveedor cloud no está desplegada en este repositorio; se documenta la estrategia objetivo.
+- No se incluye pipeline CI/CD en el estado actual.

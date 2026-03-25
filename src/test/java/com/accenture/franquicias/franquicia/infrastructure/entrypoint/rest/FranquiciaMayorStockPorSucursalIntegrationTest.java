@@ -100,4 +100,37 @@ class FranquiciaMayorStockPorSucursalIntegrationTest {
                 .jsonPath("$.sucursales[0].productos[0].productoNombre").isEqualTo("Audifonos")
                 .jsonPath("$.sucursales[0].productos[0].stock").isEqualTo(30);
     }
+
+    @Test
+    void debeRetornarListadoPlanoConProductoGanadorYSucursal() {
+        FranquiciaEntity franquicia = franquiciaRepository.saveAndFlush(new FranquiciaEntity("Franquicia Centro"));
+
+        SucursalEntity sucursalNorte = sucursalRepository.saveAndFlush(new SucursalEntity("Sucursal Norte", franquicia));
+        SucursalEntity sucursalSur = sucursalRepository.saveAndFlush(new SucursalEntity("Sucursal Sur", franquicia));
+        sucursalRepository.saveAndFlush(new SucursalEntity("Sucursal Vacia", franquicia));
+
+        ProductoEntity audifonos = productoRepository.saveAndFlush(new ProductoEntity("Audifonos", 30, sucursalNorte));
+        productoRepository.saveAndFlush(new ProductoEntity("Laptop Gamer", 30, sucursalNorte));
+        ProductoEntity mouse = productoRepository.saveAndFlush(new ProductoEntity("Mouse Inalambrico", 44, sucursalSur));
+        productoRepository.saveAndFlush(new ProductoEntity("Monitor", 8, sucursalSur));
+
+        webTestClient.get()
+                .uri("/api/v1/franquicias/{franquiciaId}/productos/mayor-stock-por-sucursal/listado", franquicia.getId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.franquiciaId").isEqualTo(franquicia.getId().toString())
+                .jsonPath("$.franquiciaNombre").isEqualTo("Franquicia Centro")
+                .jsonPath("$.productos.length()").isEqualTo(2)
+                .jsonPath("$.productos[0].sucursalId").isEqualTo(sucursalNorte.getId().toString())
+                .jsonPath("$.productos[0].sucursalNombre").isEqualTo("Sucursal Norte")
+                .jsonPath("$.productos[0].productoId").isEqualTo(audifonos.getId().toString())
+                .jsonPath("$.productos[0].productoNombre").isEqualTo("Audifonos")
+                .jsonPath("$.productos[0].stock").isEqualTo(30)
+                .jsonPath("$.productos[1].sucursalId").isEqualTo(sucursalSur.getId().toString())
+                .jsonPath("$.productos[1].sucursalNombre").isEqualTo("Sucursal Sur")
+                .jsonPath("$.productos[1].productoId").isEqualTo(mouse.getId().toString())
+                .jsonPath("$.productos[1].productoNombre").isEqualTo("Mouse Inalambrico")
+                .jsonPath("$.productos[1].stock").isEqualTo(44);
+    }
 }
