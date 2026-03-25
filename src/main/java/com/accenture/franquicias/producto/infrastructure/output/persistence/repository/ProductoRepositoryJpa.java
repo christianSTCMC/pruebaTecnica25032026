@@ -15,6 +15,11 @@ import java.util.UUID;
 public interface ProductoRepositoryJpa extends JpaRepository<ProductoEntity, UUID> {
 
     /**
+     * Retorna todos los productos ordenados por nombre para consultas independientes.
+     */
+    List<ProductoEntity> findAllByOrderByNombreAsc();
+
+    /**
      * Permite validar unicidad de nombre de producto dentro de una sucursal.
      */
     boolean existsBySucursal_IdAndNombre(UUID sucursalId, String nombre);
@@ -35,7 +40,12 @@ public interface ProductoRepositoryJpa extends JpaRepository<ProductoEntity, UUI
      * Devuelve un producto por sucursal aplicando desempate alfabetico por nombre.
      */
     @Query("""
-            select p
+            select
+                p.sucursal.id as sucursalId,
+                p.sucursal.nombre as sucursalNombre,
+                p.id as productoId,
+                p.nombre as productoNombre,
+                p.stock as stock
             from ProductoEntity p
             where p.sucursal.franquicia.id = :franquiciaId
               and p.stock = (
@@ -51,5 +61,5 @@ public interface ProductoRepositoryJpa extends JpaRepository<ProductoEntity, UUI
               )
             order by p.sucursal.nombre asc
             """)
-    List<ProductoEntity> findProductoMayorStockPorSucursal(@Param("franquiciaId") UUID franquiciaId);
+    List<ProductoMayorStockPorSucursalProjection> findProductoMayorStockPorSucursal(@Param("franquiciaId") UUID franquiciaId);
 }

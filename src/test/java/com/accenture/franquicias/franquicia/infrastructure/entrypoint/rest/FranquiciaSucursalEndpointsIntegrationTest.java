@@ -2,6 +2,7 @@ package com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest;
 
 import com.accenture.franquicias.franquicia.infrastructure.output.persistence.entity.FranquiciaEntity;
 import com.accenture.franquicias.franquicia.infrastructure.output.persistence.repository.FranquiciaRepositoryJpa;
+import com.accenture.franquicias.producto.infrastructure.output.persistence.repository.ProductoRepositoryJpa;
 import com.accenture.franquicias.sucursal.infrastructure.output.persistence.repository.SucursalRepositoryJpa;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,8 +32,12 @@ class FranquiciaSucursalEndpointsIntegrationTest {
     @Autowired
     private SucursalRepositoryJpa sucursalRepository;
 
+    @Autowired
+    private ProductoRepositoryJpa productoRepository;
+
     @BeforeEach
     void limpiarDatos() {
+        productoRepository.deleteAll();
         sucursalRepository.deleteAll();
         franquiciaRepository.deleteAll();
     }

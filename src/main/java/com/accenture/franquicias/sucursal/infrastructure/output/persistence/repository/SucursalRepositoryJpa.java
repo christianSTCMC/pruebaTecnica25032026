@@ -12,6 +12,11 @@ import java.util.UUID;
 public interface SucursalRepositoryJpa extends JpaRepository<SucursalEntity, UUID> {
 
     /**
+     * Retorna todas las sucursales ordenadas por nombre para consultas independientes.
+     */
+    List<SucursalEntity> findAllByOrderByNombreAsc();
+
+    /**
      * Retorna sucursales ordenadas por nombre para exponer respuestas deterministas.
      */
     List<SucursalEntity> findByFranquicia_IdOrderByNombreAsc(UUID franquiciaId);

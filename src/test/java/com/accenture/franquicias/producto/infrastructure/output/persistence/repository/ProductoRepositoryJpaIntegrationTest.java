@@ -63,10 +63,15 @@ class ProductoRepositoryJpaIntegrationTest {
         productoRepository.saveAndFlush(new ProductoEntity("Mouse Inalambrico", 44, sucursalSur));
         productoRepository.saveAndFlush(new ProductoEntity("Monitor", 20, sucursalSur));
 
-        List<ProductoEntity> resultado = productoRepository.findProductoMayorStockPorSucursal(franquicia.getId());
+        List<ProductoMayorStockPorSucursalProjection> resultado =
+                productoRepository.findProductoMayorStockPorSucursal(franquicia.getId());
 
         assertThat(resultado)
-                .extracting(producto -> producto.getSucursal().getNombre(), ProductoEntity::getNombre, ProductoEntity::getStock)
+                .extracting(
+                        ProductoMayorStockPorSucursalProjection::getSucursalNombre,
+                        ProductoMayorStockPorSucursalProjection::getProductoNombre,
+                        ProductoMayorStockPorSucursalProjection::getStock
+                )
                 .containsExactly(
                         tuple("Sucursal Norte", "Audifonos", 30),
                         tuple("Sucursal Sur", "Mouse Inalambrico", 44)
