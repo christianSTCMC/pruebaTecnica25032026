@@ -1,0 +1,2 @@
+2026-03-25T10:25:14.412-05:00 level=WARN  service=api-franquicias env=local thread=main logger=o.f.c.i.database.base.Database msg="Flyway upgrade recommended: MySQL 8.4 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1."
+2026-03-25T10:29:53.849-05:00 level=WARN  service=api-franquicias env=local thread=main logger=o.f.c.i.database.base.Database msg="Flyway upgrade recommended: MySQL 8.4 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1."
