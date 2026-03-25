@@ -3,6 +3,7 @@ package com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest;
 import com.accenture.franquicias.franquicia.application.dto.ConsultaMayorStockPorSucursalResultado;
 import com.accenture.franquicias.franquicia.application.dto.FranquiciaListado;
 import com.accenture.franquicias.franquicia.application.dto.ProductoMayorStockPorSucursalResultado;
+import com.accenture.franquicias.franquicia.application.dto.SucursalMayorStockPorSucursalResultado;
 import com.accenture.franquicias.franquicia.application.service.ConsultarMayorStockPorSucursalService;
 import com.accenture.franquicias.franquicia.application.service.CrearFranquiciaService;
 import com.accenture.franquicias.franquicia.application.service.ListarFranquiciasService;
@@ -10,6 +11,7 @@ import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.C
 import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.FranquiciaResponse;
 import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.MayorStockPorSucursalResponse;
 import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.ProductoMayorStockPorSucursalResponse;
+import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.SucursalMayorStockPorSucursalResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -82,7 +84,18 @@ public class FranquiciaController {
         return new MayorStockPorSucursalResponse(
                 resultado.franquiciaId(),
                 resultado.franquiciaNombre(),
-                resultado.productos().stream()
+                resultado.sucursales().stream()
+                        .map(this::mapearSucursalMayorStock)
+                        .toList()
+        );
+    }
+
+    private SucursalMayorStockPorSucursalResponse mapearSucursalMayorStock(
+            SucursalMayorStockPorSucursalResultado sucursalResultado) {
+        return new SucursalMayorStockPorSucursalResponse(
+                sucursalResultado.sucursalId(),
+                sucursalResultado.sucursalNombre(),
+                sucursalResultado.productos().stream()
                         .map(this::mapearProductoMayorStock)
                         .toList()
         );
@@ -91,8 +104,6 @@ public class FranquiciaController {
     private ProductoMayorStockPorSucursalResponse mapearProductoMayorStock(
             ProductoMayorStockPorSucursalResultado productoResultado) {
         return new ProductoMayorStockPorSucursalResponse(
-                productoResultado.sucursalId(),
-                productoResultado.sucursalNombre(),
                 productoResultado.productoId(),
                 productoResultado.productoNombre(),
                 productoResultado.stock()

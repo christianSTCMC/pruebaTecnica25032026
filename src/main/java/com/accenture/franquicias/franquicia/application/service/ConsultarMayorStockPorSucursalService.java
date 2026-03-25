@@ -2,6 +2,7 @@ package com.accenture.franquicias.franquicia.application.service;
 
 import com.accenture.franquicias.franquicia.application.dto.ConsultaMayorStockPorSucursalResultado;
 import com.accenture.franquicias.franquicia.application.dto.ProductoMayorStockPorSucursalResultado;
+import com.accenture.franquicias.franquicia.application.dto.SucursalMayorStockPorSucursalResultado;
 import com.accenture.franquicias.franquicia.infrastructure.output.persistence.entity.FranquiciaEntity;
 import com.accenture.franquicias.franquicia.infrastructure.output.persistence.repository.FranquiciaRepositoryJpa;
 import com.accenture.franquicias.producto.infrastructure.output.persistence.repository.ProductoMayorStockPorSucursalProjection;
@@ -38,26 +39,37 @@ public class ConsultarMayorStockPorSucursalService {
                     FranquiciaEntity franquicia = franquiciaRepository.findById(franquiciaId)
                             .orElseThrow(FranquiciaNoEncontradaException::new);
 
-                    List<ProductoMayorStockPorSucursalResultado> productos = productoRepository
+                    List<SucursalMayorStockPorSucursalResultado> sucursales = productoRepository
                             .findProductoMayorStockPorSucursal(franquiciaId)
                             .stream()
-                            .map(this::mapearProducto)
+                            .map(this::mapearSucursal)
                             .toList();
 
                     return new ConsultaMayorStockPorSucursalResultado(
                             franquicia.getId(),
                             franquicia.getNombre(),
-                            productos
+                            sucursales
                     );
                 })
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
+    private SucursalMayorStockPorSucursalResultado mapearSucursal(
+            ProductoMayorStockPorSucursalProjection productoProjection) {
+        /*
+         * Esta consulta devuelve un producto por sucursal (el de mayor stock), por eso
+         * el contrato anidado de sucursal contiene actualmente una lista de un elemento.
+         */
+        return new SucursalMayorStockPorSucursalResultado(
+                productoProjection.getSucursalId(),
+                productoProjection.getSucursalNombre(),
+                List.of(mapearProducto(productoProjection))
+        );
+    }
+
     private ProductoMayorStockPorSucursalResultado mapearProducto(
             ProductoMayorStockPorSucursalProjection productoProjection) {
         return new ProductoMayorStockPorSucursalResultado(
-                productoProjection.getSucursalId(),
-                productoProjection.getSucursalNombre(),
                 productoProjection.getProductoId(),
                 productoProjection.getProductoNombre(),
                 productoProjection.getStock()

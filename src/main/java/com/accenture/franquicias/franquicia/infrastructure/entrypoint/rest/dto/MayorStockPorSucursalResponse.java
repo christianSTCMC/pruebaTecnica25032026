@@ -8,11 +8,11 @@ import java.util.UUID;
  *
  * @param franquiciaId identificador de la franquicia consultada
  * @param franquiciaNombre nombre de la franquicia consultada
- * @param productos producto ganador por cada sucursal con productos
+ * @param sucursales listado de sucursales con sus productos
  */
 public record MayorStockPorSucursalResponse(
         UUID franquiciaId,
         String franquiciaNombre,
-        List<ProductoMayorStockPorSucursalResponse> productos
+        List<SucursalMayorStockPorSucursalResponse> sucursales
 ) {
 }

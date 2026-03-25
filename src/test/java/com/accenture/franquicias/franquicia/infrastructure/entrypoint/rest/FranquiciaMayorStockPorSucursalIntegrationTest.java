@@ -61,17 +61,19 @@ class FranquiciaMayorStockPorSucursalIntegrationTest {
                 .expectBody()
                 .jsonPath("$.franquiciaId").isEqualTo(franquicia.getId().toString())
                 .jsonPath("$.franquiciaNombre").isEqualTo("Franquicia Centro")
-                .jsonPath("$.productos.length()").isEqualTo(2)
-                .jsonPath("$.productos[0].sucursalId").isEqualTo(sucursalNorte.getId().toString())
-                .jsonPath("$.productos[0].sucursalNombre").isEqualTo("Sucursal Norte")
-                .jsonPath("$.productos[0].productoId").isEqualTo(audifonos.getId().toString())
-                .jsonPath("$.productos[0].productoNombre").isEqualTo("Audifonos")
-                .jsonPath("$.productos[0].stock").isEqualTo(30)
-                .jsonPath("$.productos[1].sucursalId").isEqualTo(sucursalSur.getId().toString())
-                .jsonPath("$.productos[1].sucursalNombre").isEqualTo("Sucursal Sur")
-                .jsonPath("$.productos[1].productoId").isEqualTo(mouse.getId().toString())
-                .jsonPath("$.productos[1].productoNombre").isEqualTo("Mouse Inalambrico")
-                .jsonPath("$.productos[1].stock").isEqualTo(44);
+                .jsonPath("$.sucursales.length()").isEqualTo(2)
+                .jsonPath("$.sucursales[0].sucursalId").isEqualTo(sucursalNorte.getId().toString())
+                .jsonPath("$.sucursales[0].sucursalNombre").isEqualTo("Sucursal Norte")
+                .jsonPath("$.sucursales[0].productos.length()").isEqualTo(1)
+                .jsonPath("$.sucursales[0].productos[0].productoId").isEqualTo(audifonos.getId().toString())
+                .jsonPath("$.sucursales[0].productos[0].productoNombre").isEqualTo("Audifonos")
+                .jsonPath("$.sucursales[0].productos[0].stock").isEqualTo(30)
+                .jsonPath("$.sucursales[1].sucursalId").isEqualTo(sucursalSur.getId().toString())
+                .jsonPath("$.sucursales[1].sucursalNombre").isEqualTo("Sucursal Sur")
+                .jsonPath("$.sucursales[1].productos.length()").isEqualTo(1)
+                .jsonPath("$.sucursales[1].productos[0].productoId").isEqualTo(mouse.getId().toString())
+                .jsonPath("$.sucursales[1].productos[0].productoNombre").isEqualTo("Mouse Inalambrico")
+                .jsonPath("$.sucursales[1].productos[0].stock").isEqualTo(44);
     }
 
     @Test
@@ -90,11 +92,12 @@ class FranquiciaMayorStockPorSucursalIntegrationTest {
                 .expectBody()
                 .jsonPath("$.franquiciaId").isEqualTo(franquicia.getId().toString())
                 .jsonPath("$.franquiciaNombre").isEqualTo("Franquicia Centro")
-                .jsonPath("$.productos.length()").isEqualTo(1)
-                .jsonPath("$.productos[0].sucursalId").isEqualTo(sucursalNorte.getId().toString())
-                .jsonPath("$.productos[0].sucursalNombre").isEqualTo("Sucursal Norte")
-                .jsonPath("$.productos[0].productoId").isEqualTo(audifonos.getId().toString())
-                .jsonPath("$.productos[0].productoNombre").isEqualTo("Audifonos")
-                .jsonPath("$.productos[0].stock").isEqualTo(30);
+                .jsonPath("$.sucursales.length()").isEqualTo(1)
+                .jsonPath("$.sucursales[0].sucursalId").isEqualTo(sucursalNorte.getId().toString())
+                .jsonPath("$.sucursales[0].sucursalNombre").isEqualTo("Sucursal Norte")
+                .jsonPath("$.sucursales[0].productos.length()").isEqualTo(1)
+                .jsonPath("$.sucursales[0].productos[0].productoId").isEqualTo(audifonos.getId().toString())
+                .jsonPath("$.sucursales[0].productos[0].productoNombre").isEqualTo("Audifonos")
+                .jsonPath("$.sucursales[0].productos[0].stock").isEqualTo(30);
     }
 }
