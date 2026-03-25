@@ -1,5 +1,9 @@
 package com.accenture.franquicias.compartido.infrastructure.entrypoint.rest.error;
 
+import com.accenture.franquicias.producto.application.service.ProductoDuplicadoEnSucursalException;
+import com.accenture.franquicias.producto.application.service.ProductoNoEncontradoException;
+import com.accenture.franquicias.producto.application.service.ProductoNoPerteneceASucursalException;
+import com.accenture.franquicias.producto.application.service.SucursalNoEncontradaException;
 import com.accenture.franquicias.sucursal.application.service.FranquiciaNoEncontradaException;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -59,13 +63,30 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Maneja el caso de franquicia inexistente al crear una sucursal.
+     * Maneja faltantes de recursos de negocio con respuesta 404.
      */
-    @ExceptionHandler(FranquiciaNoEncontradaException.class)
-    public ResponseEntity<ApiErrorResponse> manejarFranquiciaNoEncontrada(
-            FranquiciaNoEncontradaException ex,
+    @ExceptionHandler({
+            FranquiciaNoEncontradaException.class,
+            SucursalNoEncontradaException.class,
+            ProductoNoEncontradoException.class
+    })
+    public ResponseEntity<ApiErrorResponse> manejarRecursoNoEncontrado(
+            RuntimeException ex,
             ServerWebExchange exchange) {
         return construirRespuesta(HttpStatus.NOT_FOUND, ex.getMessage(), exchange);
+    }
+
+    /**
+     * Maneja conflictos de negocio como duplicidad o pertenencia invalida.
+     */
+    @ExceptionHandler({
+            ProductoDuplicadoEnSucursalException.class,
+            ProductoNoPerteneceASucursalException.class
+    })
+    public ResponseEntity<ApiErrorResponse> manejarConflictoNegocio(
+            RuntimeException ex,
+            ServerWebExchange exchange) {
+        return construirRespuesta(HttpStatus.CONFLICT, ex.getMessage(), exchange);
     }
 
     private ResponseEntity<ApiErrorResponse> construirRespuesta(

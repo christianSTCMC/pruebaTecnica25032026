@@ -15,9 +15,9 @@ public class OpenApiConfig {
 
     @Bean
     public OpenAPI franquiciasOpenApi(
-            @Value("${api.info.title}") String title,
-            @Value("${api.info.description}") String description,
-            @Value("${api.info.version}") String version) {
+            @Value("${api.info.title:API de Franquicias}") String title,
+            @Value("${api.info.description:API para gestionar franquicias, sucursales y productos}") String description,
+            @Value("${api.info.version:v1}") String version) {
         return new OpenAPI().info(new Info()
                 .title(title)
                 .description(description)
