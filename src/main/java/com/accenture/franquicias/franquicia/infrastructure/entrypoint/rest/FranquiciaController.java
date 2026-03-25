@@ -153,7 +153,8 @@ public class FranquiciaController {
     }
 
     /**
-     * Obtiene el producto con mayor stock por sucursal para la franquicia indicada.
+     * Obtiene todas las sucursales de una franquicia y, para cada una,
+     * el producto con mayor stock cuando exista.
      */
     @GetMapping("/{franquiciaId}/productos/mayor-stock-por-sucursal")
     @Operation(

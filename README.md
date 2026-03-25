@@ -216,7 +216,8 @@ Decisión técnica relevante:
 - No se permiten sucursales con nombre duplicado.
 - No se permiten productos duplicados por `(sucursal_id, nombre)`.
 - En empate de stock máximo por sucursal, se selecciona el producto con nombre alfabéticamente menor.
-- En la consulta agregada solo se listan sucursales que tienen productos.
+- En la consulta agregada anidada se listan todas las sucursales de la franquicia; si una sucursal no tiene productos, se retorna con `productos: []`.
+- En la consulta agregada en formato plano se listan productos ganadores por sucursal (solo sucursales con producto).
 
 Estas reglas están reforzadas en validaciones de entrada, lógica de aplicación y restricciones de base de datos.
 

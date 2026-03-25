@@ -42,7 +42,7 @@ class FranquiciaMayorStockPorSucursalIntegrationTest {
     }
 
     @Test
-    void debeRetornarUnProductoPorCadaSucursalConProductos() {
+    void debeRetornarTodasLasSucursalesYUnProductoGanadorEnCadaSucursalConProductos() {
         FranquiciaEntity franquicia = franquiciaRepository.saveAndFlush(new FranquiciaEntity("Franquicia Centro"));
 
         SucursalEntity sucursalNorte = sucursalRepository.saveAndFlush(new SucursalEntity("Sucursal Norte", franquicia));
@@ -61,7 +61,7 @@ class FranquiciaMayorStockPorSucursalIntegrationTest {
                 .expectBody()
                 .jsonPath("$.franquiciaId").isEqualTo(franquicia.getId().toString())
                 .jsonPath("$.franquiciaNombre").isEqualTo("Franquicia Centro")
-                .jsonPath("$.sucursales.length()").isEqualTo(2)
+                .jsonPath("$.sucursales.length()").isEqualTo(3)
                 .jsonPath("$.sucursales[0].sucursalId").isEqualTo(sucursalNorte.getId().toString())
                 .jsonPath("$.sucursales[0].sucursalNombre").isEqualTo("Sucursal Norte")
                 .jsonPath("$.sucursales[0].productos.length()").isEqualTo(1)
@@ -73,7 +73,9 @@ class FranquiciaMayorStockPorSucursalIntegrationTest {
                 .jsonPath("$.sucursales[1].productos.length()").isEqualTo(1)
                 .jsonPath("$.sucursales[1].productos[0].productoId").isEqualTo(mouse.getId().toString())
                 .jsonPath("$.sucursales[1].productos[0].productoNombre").isEqualTo("Mouse Inalambrico")
-                .jsonPath("$.sucursales[1].productos[0].stock").isEqualTo(44);
+                .jsonPath("$.sucursales[1].productos[0].stock").isEqualTo(44)
+                .jsonPath("$.sucursales[2].sucursalNombre").isEqualTo("Sucursal Vacia")
+                .jsonPath("$.sucursales[2].productos.length()").isEqualTo(0);
     }
 
     @Test

@@ -8,12 +8,17 @@ import com.accenture.franquicias.franquicia.infrastructure.output.persistence.re
 import com.accenture.franquicias.producto.infrastructure.output.persistence.repository.ProductoMayorStockPorSucursalProjection;
 import com.accenture.franquicias.producto.infrastructure.output.persistence.repository.ProductoRepositoryJpa;
 import com.accenture.franquicias.sucursal.application.service.FranquiciaNoEncontradaException;
+import com.accenture.franquicias.sucursal.infrastructure.output.persistence.entity.SucursalEntity;
+import com.accenture.franquicias.sucursal.infrastructure.output.persistence.repository.SucursalRepositoryJpa;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Caso de uso para consultar el producto con mayor stock por sucursal de una franquicia.
@@ -22,12 +27,15 @@ import java.util.UUID;
 public class ConsultarMayorStockPorSucursalService {
 
     private final FranquiciaRepositoryJpa franquiciaRepository;
+    private final SucursalRepositoryJpa sucursalRepository;
     private final ProductoRepositoryJpa productoRepository;
 
     public ConsultarMayorStockPorSucursalService(
             FranquiciaRepositoryJpa franquiciaRepository,
+            SucursalRepositoryJpa sucursalRepository,
             ProductoRepositoryJpa productoRepository) {
         this.franquiciaRepository = franquiciaRepository;
+        this.sucursalRepository = sucursalRepository;
         this.productoRepository = productoRepository;
     }
 
@@ -39,10 +47,22 @@ public class ConsultarMayorStockPorSucursalService {
                     FranquiciaEntity franquicia = franquiciaRepository.findById(franquiciaId)
                             .orElseThrow(FranquiciaNoEncontradaException::new);
 
-                    List<SucursalMayorStockPorSucursalResultado> sucursales = productoRepository
+                    Map<UUID, ProductoMayorStockPorSucursalProjection> productoGanadorPorSucursal = productoRepository
                             .findProductoMayorStockPorSucursal(franquiciaId)
                             .stream()
-                            .map(this::mapearSucursal)
+                            .collect(Collectors.toMap(
+                                    ProductoMayorStockPorSucursalProjection::getSucursalId,
+                                    Function.identity(),
+                                    (primero, segundo) -> primero
+                            ));
+
+                    List<SucursalMayorStockPorSucursalResultado> sucursales = sucursalRepository
+                            .findByFranquicia_IdOrderByNombreAsc(franquiciaId)
+                            .stream()
+                            .map(sucursal -> mapearSucursal(
+                                    sucursal,
+                                    productoGanadorPorSucursal.get(sucursal.getId())
+                            ))
                             .toList();
 
                     return new ConsultaMayorStockPorSucursalResultado(
@@ -55,15 +75,17 @@ public class ConsultarMayorStockPorSucursalService {
     }
 
     private SucursalMayorStockPorSucursalResultado mapearSucursal(
+            SucursalEntity sucursal,
             ProductoMayorStockPorSucursalProjection productoProjection) {
-        /*
-         * Esta consulta devuelve un producto por sucursal (el de mayor stock), por eso
-         * el contrato anidado de sucursal contiene actualmente una lista de un elemento.
-         */
+        // Si una sucursal no tiene productos, se mantiene en la respuesta con lista vacia.
+        List<ProductoMayorStockPorSucursalResultado> productos = productoProjection == null
+                ? List.of()
+                : List.of(mapearProducto(productoProjection));
+
         return new SucursalMayorStockPorSucursalResultado(
-                productoProjection.getSucursalId(),
-                productoProjection.getSucursalNombre(),
-                List.of(mapearProducto(productoProjection))
+                sucursal.getId(),
+                sucursal.getNombre(),
+                productos
         );
     }
 

@@ -360,7 +360,7 @@ Notas del contrato:
 
 - El arreglo `sucursales` se ordena por nombre de sucursal ascendente.
 - En empate de stock, se elige el producto con nombre alfabéticamente menor.
-- Las sucursales sin productos no aparecen en esta respuesta.
+- Las sucursales sin productos aparecen con `productos: []`.
 
 #### `GET /api/v1/franquicias/{franquiciaId}/productos/mayor-stock-por-sucursal/listado`
 
