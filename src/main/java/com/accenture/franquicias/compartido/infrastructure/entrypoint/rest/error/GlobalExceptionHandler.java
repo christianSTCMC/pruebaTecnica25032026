@@ -5,6 +5,8 @@ import com.accenture.franquicias.producto.application.service.ProductoNoEncontra
 import com.accenture.franquicias.producto.application.service.ProductoNoPerteneceASucursalException;
 import com.accenture.franquicias.producto.application.service.SucursalNoEncontradaException;
 import com.accenture.franquicias.sucursal.application.service.FranquiciaNoEncontradaException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +26,9 @@ import java.time.Instant;
 @Order(-2)
 public class GlobalExceptionHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     private static final String MENSAJE_SOLICITUD_INVALIDA = "Solicitud invalida";
+    private static final String MENSAJE_ERROR_INTERNO = "Error interno del servidor";
 
     /**
      * Maneja errores de validacion de request body para responder 400.
@@ -48,8 +52,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> manejarErrorEntrada(
             ServerWebInputException ex,
             ServerWebExchange exchange) {
-        String mensaje = ex.getReason() == null ? MENSAJE_SOLICITUD_INVALIDA : MENSAJE_SOLICITUD_INVALIDA;
-        return construirRespuesta(HttpStatus.BAD_REQUEST, mensaje, exchange);
+        // Se evita filtrar detalles tecnicos al cliente y se conserva traza de depuracion.
+        LOGGER.debug("Error de conversion o parseo en la solicitud: {}", ex.getReason());
+        return construirRespuesta(HttpStatus.BAD_REQUEST, MENSAJE_SOLICITUD_INVALIDA, exchange);
     }
 
     /**
@@ -87,6 +92,17 @@ public class GlobalExceptionHandler {
             RuntimeException ex,
             ServerWebExchange exchange) {
         return construirRespuesta(HttpStatus.CONFLICT, ex.getMessage(), exchange);
+    }
+
+    /**
+     * Maneja errores no controlados para responder 500 con formato homogeneo.
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> manejarErrorInesperado(
+            Exception ex,
+            ServerWebExchange exchange) {
+        LOGGER.error("Error no controlado en la capa HTTP", ex);
+        return construirRespuesta(HttpStatus.INTERNAL_SERVER_ERROR, MENSAJE_ERROR_INTERNO, exchange);
     }
 
     private ResponseEntity<ApiErrorResponse> construirRespuesta(

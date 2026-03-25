@@ -238,6 +238,46 @@ class ProductoEndpointsIntegrationTest {
                 .jsonPath("$.path").isEqualTo("/api/v1/productos/" + producto.getId() + "/stock");
     }
 
+    @Test
+    void debeRetornar400CuandoProductoIdNoEsUuidValidoAlActualizarStock() {
+        webTestClient.patch()
+                .uri("/api/v1/productos/id-invalido/stock")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("""
+                        {
+                          "stock": 10
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(400)
+                .jsonPath("$.error").isEqualTo("Bad Request")
+                .jsonPath("$.message").isEqualTo("Solicitud invalida")
+                .jsonPath("$.path").isEqualTo("/api/v1/productos/id-invalido/stock");
+    }
+
+    @Test
+    void debeRetornar400CuandoStockEsNuloAlActualizarStock() {
+        SucursalEntity sucursal = crearSucursal("Franquicia Centro", "Sucursal Norte");
+        ProductoEntity producto = productoRepository.saveAndFlush(new ProductoEntity("Mouse", 12, sucursal));
+
+        webTestClient.patch()
+                .uri("/api/v1/productos/{productoId}/stock", producto.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("""
+                        {
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(400)
+                .jsonPath("$.error").isEqualTo("Bad Request")
+                .jsonPath("$.message").isEqualTo("El stock es obligatorio")
+                .jsonPath("$.path").isEqualTo("/api/v1/productos/" + producto.getId() + "/stock");
+    }
+
     private SucursalEntity crearSucursal(String nombreFranquicia, String nombreSucursal) {
         FranquiciaEntity franquicia = franquiciaRepository.saveAndFlush(new FranquiciaEntity(nombreFranquicia));
         return sucursalRepository.saveAndFlush(new SucursalEntity(nombreSucursal, franquicia));

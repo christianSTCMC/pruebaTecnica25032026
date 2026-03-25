@@ -1,5 +1,6 @@
 package com.accenture.franquicias.producto.infrastructure.entrypoint.rest;
 
+import com.accenture.franquicias.compartido.infrastructure.entrypoint.rest.error.ApiErrorResponse;
 import com.accenture.franquicias.producto.application.dto.ProductoListado;
 import com.accenture.franquicias.producto.application.dto.ProductoResultado;
 import com.accenture.franquicias.producto.application.service.ActualizarStockProductoService;
@@ -9,6 +10,13 @@ import com.accenture.franquicias.producto.application.service.ListarProductosSer
 import com.accenture.franquicias.producto.infrastructure.entrypoint.rest.dto.ActualizarStockProductoRequest;
 import com.accenture.franquicias.producto.infrastructure.entrypoint.rest.dto.CrearProductoRequest;
 import com.accenture.franquicias.producto.infrastructure.entrypoint.rest.dto.ProductoResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,6 +39,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping(path = "/api/v1", produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = "Productos", description = "Operaciones para gestionar productos por sucursal")
 public class ProductoController {
 
     private final CrearProductoService crearProductoService;
@@ -53,6 +62,32 @@ public class ProductoController {
      * Crea un producto en la sucursal indicada.
      */
     @PostMapping(path = "/sucursales/{sucursalId}/productos", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Crear producto",
+            description = "Crea un producto en una sucursal existente validando nombre unico por sucursal."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Producto creado",
+                    content = @Content(schema = @Schema(implementation = ProductoResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Solicitud invalida",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Sucursal no encontrada",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Conflicto de negocio por duplicidad",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
     public Mono<ResponseEntity<ProductoResponse>> crearProducto(
             @PathVariable UUID sucursalId,
             @Valid @RequestBody CrearProductoRequest request) {
@@ -64,6 +99,28 @@ public class ProductoController {
      * Elimina un producto validando que pertenezca a la sucursal del path.
      */
     @DeleteMapping(path = "/sucursales/{sucursalId}/productos/{productoId}")
+    @Operation(
+            summary = "Eliminar producto",
+            description = "Elimina un producto siempre que pertenezca a la sucursal indicada."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Producto eliminado"),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Solicitud invalida",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Producto o sucursal no encontrados",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "El producto no pertenece a la sucursal indicada",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
     public Mono<ResponseEntity<Void>> eliminarProducto(
             @PathVariable UUID sucursalId,
             @PathVariable UUID productoId) {
@@ -75,6 +132,27 @@ public class ProductoController {
      * Modifica el stock del producto indicado.
      */
     @PatchMapping(path = "/productos/{productoId}/stock", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Actualizar stock de producto",
+            description = "Actualiza el stock de un producto existente validando que sea mayor o igual a cero."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Stock actualizado",
+                    content = @Content(schema = @Schema(implementation = ProductoResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Solicitud invalida",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Producto no encontrado",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
     public Mono<ResponseEntity<ProductoResponse>> actualizarStock(
             @PathVariable UUID productoId,
             @Valid @RequestBody ActualizarStockProductoRequest request) {
@@ -86,6 +164,15 @@ public class ProductoController {
      * Lista todos los productos de forma independiente.
      */
     @GetMapping(path = "/productos")
+    @Operation(
+            summary = "Listar productos",
+            description = "Retorna el listado completo de productos registrados."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Listado de productos",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProductoResponse.class)))
+    )
     public Mono<ResponseEntity<List<ProductoResponse>>> listarProductos() {
         return listarProductosService.ejecutar()
                 .map(this::mapearListadoProductos)

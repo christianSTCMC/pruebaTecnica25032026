@@ -1,5 +1,6 @@
 package com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest;
 
+import com.accenture.franquicias.compartido.infrastructure.entrypoint.rest.error.ApiErrorResponse;
 import com.accenture.franquicias.franquicia.application.dto.ConsultaMayorStockPorSucursalResultado;
 import com.accenture.franquicias.franquicia.application.dto.FranquiciaListado;
 import com.accenture.franquicias.franquicia.application.dto.ProductoMayorStockPorSucursalResultado;
@@ -12,6 +13,13 @@ import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.F
 import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.MayorStockPorSucursalResponse;
 import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.ProductoMayorStockPorSucursalResponse;
 import com.accenture.franquicias.franquicia.infrastructure.entrypoint.rest.dto.SucursalMayorStockPorSucursalResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,6 +40,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping(path = "/api/v1/franquicias", produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = "Franquicias", description = "Operaciones para gestionar franquicias y sus consultas agregadas")
 public class FranquiciaController {
 
     private final CrearFranquiciaService crearFranquiciaService;
@@ -51,6 +60,22 @@ public class FranquiciaController {
      * Endpoint para crear una nueva franquicia.
      */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Crear franquicia",
+            description = "Crea una franquicia validando que el nombre no sea nulo ni vacio."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Franquicia creada",
+                    content = @Content(schema = @Schema(implementation = FranquiciaResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Solicitud invalida",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
     public Mono<ResponseEntity<FranquiciaResponse>> crearFranquicia(
             @Valid @RequestBody CrearFranquiciaRequest request) {
         return crearFranquiciaService.ejecutar(request.nombre())
@@ -62,6 +87,15 @@ public class FranquiciaController {
      * Lista todas las franquicias de forma independiente.
      */
     @GetMapping
+    @Operation(
+            summary = "Listar franquicias",
+            description = "Retorna el listado completo de franquicias registradas."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Listado de franquicias",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = FranquiciaResponse.class)))
+    )
     public Mono<ResponseEntity<List<FranquiciaResponse>>> listarFranquicias() {
         return listarFranquiciasService.ejecutar()
                 .map(this::mapearFranquicias)
@@ -72,6 +106,27 @@ public class FranquiciaController {
      * Obtiene el producto con mayor stock por sucursal para la franquicia indicada.
      */
     @GetMapping("/{franquiciaId}/productos/mayor-stock-por-sucursal")
+    @Operation(
+            summary = "Consultar mayor stock por sucursal",
+            description = "Obtiene un producto por sucursal con mayor stock para la franquicia indicada."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Consulta procesada correctamente",
+                    content = @Content(schema = @Schema(implementation = MayorStockPorSucursalResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Identificador de franquicia invalido",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Franquicia no encontrada",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
     public Mono<ResponseEntity<MayorStockPorSucursalResponse>> consultarMayorStockPorSucursal(
             @PathVariable UUID franquiciaId) {
         return consultarMayorStockPorSucursalService.ejecutar(franquiciaId)
