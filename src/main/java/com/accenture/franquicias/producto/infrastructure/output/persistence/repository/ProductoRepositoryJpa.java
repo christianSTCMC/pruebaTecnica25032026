@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -33,12 +32,6 @@ public interface ProductoRepositoryJpa extends JpaRepository<ProductoEntity, UUI
      * Se usa para validar pertenencia del producto a la sucursal durante eliminacion.
      */
     boolean existsByIdAndSucursal_Id(UUID productoId, UUID sucursalId);
-
-    /**
-     * Consulta el producto con mayor stock de una sucursal,
-     * desempata por nombre ascendente para mantener respuesta determinista.
-     */
-    Optional<ProductoEntity> findFirstBySucursal_IdOrderByStockDescNombreAsc(UUID sucursalId);
 
     /**
      * Consulta para soportar el endpoint de mayor stock por sucursal de una franquicia.

@@ -1,0 +1,16 @@
+
+.agents/
+
+AGENTS.md
+.env
+target/
+.mvn/wrapper/maven-wrapper.jar
+logs/*
+!logs/backend-api/
+!logs/backend-api/.gitkeep
+!logs/db/
+!logs/db/.gitkeep
+!logs/error/
+!logs/error/.gitkeep
+
+logs/

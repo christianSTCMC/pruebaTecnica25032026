@@ -246,5 +246,12 @@ Estas reglas están reforzadas en validaciones de entrada, lógica de aplicació
 
 ## Brechas conocidas del estado actual
 
+- Este repositorio corresponde a una **prueba técnica** y no a una configuración productiva endurecida.
 - La persistencia productiva en proveedor cloud no está desplegada en este repositorio; se documenta la estrategia objetivo.
 - No se incluye pipeline CI/CD en el estado actual.
+- Seguridad de acceso pendiente: la API no implementa autenticación/autorización robusta (por ejemplo `OAuth2`/`JWT`) ni control por roles/permisos (`RBAC`).
+- Seguridad de transporte pendiente: no se configura `HTTPS/TLS` de extremo a extremo en este setup local.
+- Base de datos expuesta para entorno local: en `docker-compose` se publica `MySQL` en puerto host (`3306`) para facilitar pruebas; en producción debe restringirse/red privada.
+- Gestión de secretos pendiente: credenciales en `.env`/`.env.template` con valores de ejemplo; para producción se requiere secret manager y rotación.
+- Protección operativa pendiente: faltan controles de seguridad como `rate limiting`, políticas CORS estrictas por entorno y protección adicional de abuso.
+- Falta estrategia formal de seguridad aplicada de punta a punta (escaneo de dependencias, hardening de contenedores e integración de controles en CI/CD).

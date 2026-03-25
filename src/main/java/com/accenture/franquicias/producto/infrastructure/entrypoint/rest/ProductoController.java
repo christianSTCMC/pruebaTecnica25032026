@@ -139,7 +139,7 @@ public class ProductoController {
     @PatchMapping(path = "/productos/{productoId}/stock", consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "Actualizar stock de producto",
-            description = "Actualiza el stock de un producto existente validando que sea mayor o igual a cero."
+            description = "Actualiza el stock de un producto existente validando rango de 0 a 2147483647."
     )
     @ApiResponses({
             @ApiResponse(
@@ -161,7 +161,8 @@ public class ProductoController {
     public Mono<ResponseEntity<ProductoResponse>> actualizarStock(
             @PathVariable UUID productoId,
             @Valid @RequestBody ActualizarStockProductoRequest request) {
-        return actualizarStockProductoService.ejecutar(productoId, request.stock())
+        // La conversion es segura porque el request ya valida el maximo permitido por INT en DB.
+        return actualizarStockProductoService.ejecutar(productoId, Math.toIntExact(request.stock()))
                 .map(resultado -> ResponseEntity.ok(mapearRespuesta(resultado)));
     }
 
