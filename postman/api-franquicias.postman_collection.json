@@ -1,0 +1,263 @@
+{
+  "info": {
+    "name": "API Franquicias",
+    "_postman_id": "a7e9c96d-1ee3-4d53-8f66-c2d7c0305a52",
+    "description": "Coleccion de requests para el proyecto API de Franquicias.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Franquicias",
+      "item": [
+        {
+          "name": "Crear Franquicia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Franquicia Centro\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/v1/franquicias",
+            "description": "Crea una franquicia nueva."
+          }
+        },
+        {
+          "name": "Listar Franquicias",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/franquicias",
+            "description": "Obtiene el listado independiente de franquicias."
+          }
+        },
+        {
+          "name": "Actualizar Nombre Franquicia",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Franquicia Centro Renombrada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/v1/franquicias/{{franquiciaId}}/nombre",
+            "description": "Actualiza el nombre de la franquicia indicada."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sucursales",
+      "item": [
+        {
+          "name": "Crear Sucursal en Franquicia",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sucursal Norte\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/v1/franquicias/{{franquiciaId}}/sucursales",
+            "description": "Crea una sucursal dentro de la franquicia indicada."
+          }
+        },
+        {
+          "name": "Listar Sucursales",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/sucursales",
+            "description": "Obtiene el listado independiente de sucursales."
+          }
+        },
+        {
+          "name": "Actualizar Nombre Sucursal",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sucursal Norte Renombrada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/v1/sucursales/{{sucursalId}}/nombre",
+            "description": "Actualiza el nombre de la sucursal indicada."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Crear Producto en Sucursal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Laptop Gamer\",\n  \"stock\": 15\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/v1/sucursales/{{sucursalId}}/productos",
+            "description": "Crea un producto en la sucursal indicada."
+          }
+        },
+        {
+          "name": "Listar Productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/productos",
+            "description": "Obtiene el listado independiente de productos."
+          }
+        },
+        {
+          "name": "Actualizar Stock Producto",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stock\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/v1/productos/{{productoId}}/stock",
+            "description": "Actualiza el stock del producto."
+          }
+        },
+        {
+          "name": "Eliminar Producto de Sucursal",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/sucursales/{{sucursalId}}/productos/{{productoId}}",
+            "description": "Elimina el producto indicado de la sucursal indicada."
+          }
+        },
+        {
+          "name": "Actualizar Nombre Producto",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Laptop Gamer Pro\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/v1/productos/{{productoId}}/nombre",
+            "description": "Actualiza el nombre del producto indicado."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consultas Especiales",
+      "item": [
+        {
+          "name": "Mayor Stock por Sucursal",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/franquicias/{{franquiciaId}}/productos/mayor-stock-por-sucursal",
+            "description": "Obtiene el producto con mayor stock por sucursal para la franquicia indicada."
+          }
+        },
+        {
+          "name": "Mayor Stock por Sucursal (Listado Plano)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/franquicias/{{franquiciaId}}/productos/mayor-stock-por-sucursal/listado",
+            "description": "Obtiene el producto con mayor stock por sucursal en formato plano, incluyendo la sucursal de cada producto."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "franquiciaId",
+      "value": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "key": "sucursalId",
+      "value": "00000000-0000-0000-0000-000000000002"
+    },
+    {
+      "key": "productoId",
+      "value": "00000000-0000-0000-0000-000000000003"
+    }
+  ]
+}

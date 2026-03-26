@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: api-franquicias
+  datasource:
+    url: ${FRANQUICIAS_DB_JDBC_URL:jdbc:mysql://localhost:3306/franquicias?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${FRANQUICIAS_DB_USERNAME:franquicias_user}
+    password: ${FRANQUICIAS_DB_PASSWORD:franquicias_pass}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        type:
+          preferred_uuid_jdbc_type: CHAR
+        format_sql: false
+  flyway:
+    enabled: ${FRANQUICIAS_FLYWAY_ENABLED:true}
+    locations: classpath:db/migration
+
+server:
+  port: ${SERVER_PORT:8080}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  paths-to-match: /api/v1/**
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    root: ${APP_LOG_LEVEL_ROOT:INFO}
+    org.springframework: ${APP_LOG_LEVEL_SPRING:INFO}
+    com.accenture.franquicias: ${APP_LOG_LEVEL_APP:INFO}
+    org.hibernate.SQL: ${APP_LOG_LEVEL_DB:WARN}
+    org.hibernate.orm.jdbc.bind: ${APP_LOG_LEVEL_DB:WARN}
+    org.flywaydb: ${APP_LOG_LEVEL_DB:WARN}
+
+api:
+  info:
+    title: API de Franquicias
+    description: Servicio para administrar franquicias, sucursales y productos.
+    version: v1
+
+app:
+  logging:
+    path: ${APP_LOGS_PATH:./logs}
+    max-file-size: ${APP_LOGS_MAX_FILE_SIZE:10MB}
+    max-history: ${APP_LOGS_MAX_HISTORY:14}
+    total-size-cap: ${APP_LOGS_TOTAL_SIZE_CAP:1GB}
