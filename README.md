@@ -78,7 +78,7 @@ Reportes generados por Maven Surefire:
 
 ### Colecciones disponibles
 
-- `postman/api-franquicias-seed-10-10-20.postman_collection.json`
+- `postman/APIFranquicias-SemillaDB2-10-200.postman_collection.json`
 - `postman/api-franquicias.postman_collection.json`
 
 ### Uso recomendado en Postman Desktop
@@ -98,7 +98,7 @@ Reportes generados por Maven Surefire:
 ### Ejecución opcional por CLI con Newman
 
 ```bash
-newman run postman/api-franquicias-seed-10-10-20.postman_collection.json --env-var baseUrl=http://localhost:8080
+newman run postman/APIFranquicias-SemillaDB2-10-200.postman_collection.json --env-var baseUrl=http://localhost:8080
 newman run postman/api-franquicias.postman_collection.json --env-var baseUrl=http://localhost:8080 --env-var franquiciaId=<UUID_REAL> --env-var sucursalId=<UUID_REAL> --env-var productoId=<UUID_REAL>
 ```
 
@@ -156,13 +156,14 @@ Estas reglas están reforzadas en validaciones de entrada, lógica de aplicació
 ## Artefactos del proyecto
 
 - Colección Postman funcional: `postman/api-franquicias.postman_collection.json`
-- Colección Postman para carga de datos: `postman/api-franquicias-seed-10-10-20.postman_collection.json`
+- Colección Postman para carga de datos: `postman/APIFranquicias-SemillaDB2-10-200.postman_collection.json`
 - Migración base de esquema: `src/main/resources/db/migration/V1__crear_esquema_inicial_franquicias.sql`
 
 ## Brechas conocidas del estado actual
 
 - Este repositorio corresponde a una **prueba técnica** y no a una configuración productiva endurecida.
-- La persistencia productiva en proveedor cloud no está desplegada en este repositorio; se documenta la estrategia objetivo.
+- Existe despliegue cloud base con Terraform (`infra/terraform/aws`) para ambiente de prueba (`EC2 + MySQL en Docker`).
+- La persistencia de nivel productivo aún está pendiente (por ejemplo `RDS/Aurora`, `Multi-AZ`, backups administrados y failover).
 - No se incluye pipeline CI/CD en el estado actual.
 - Seguridad de acceso pendiente: la API no implementa autenticación/autorización robusta (por ejemplo `OAuth2`/`JWT`) ni control por roles/permisos (`RBAC`).
 - Seguridad de transporte pendiente: no se configura `HTTPS/TLS` de extremo a extremo en este setup local.

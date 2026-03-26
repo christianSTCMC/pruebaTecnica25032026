@@ -75,7 +75,7 @@ aws ec2 wait instance-stopped \
 Comando directo (sin variables), útil para troubleshooting:
 
 ```bash
-aws ec2 stop-instances --region us-east-1 --instance-ids i-082448d50776e069e
+aws ec2 stop-instances --region us-east-1 --instance-ids <INSTANCE_ID>
 ```
 
 ## 3) Encender instancia (start)
