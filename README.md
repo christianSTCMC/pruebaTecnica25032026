@@ -14,13 +14,23 @@ Servicio backend para gestionar franquicias, sucursales y productos, incluyendo 
 
 Fecha de corte documentada: **25 de marzo de 2026**.
 
+### Estado técnico de la API
+
 - Arquitectura backend implementada con `Spring Boot 3.5.12` y `Java 21`.
 - Capa HTTP reactiva con `Spring WebFlux`.
 - Persistencia relacional con `Spring Data JPA` + `MySQL`.
 - Migraciones versionadas con `Flyway`.
 - Contrato OpenAPI publicado con `springdoc-openapi`.
 - Logging estructurado con separación por categorías (`backend-api`, `db`, `error`).
-- Suite de pruebas verificada : **45 pruebas, 0 fallas, 0 errores**.
+- Suite de pruebas verificada: **45 pruebas, 0 fallas, 0 errores**.
+
+### Estado de ejecución y despliegue
+
+- Ejecución local sin Docker documentada y validada ([guía](DOCS/ejecucion-manual.md)).
+- Ejecución local con `Docker Compose` implementada para `app + mysql` ([guía](DOCS/ejecucion-docker.md)).
+- Infraestructura base en AWS aprovisionable con Terraform (`EC2 Ubuntu 22.04 + Elastic IP + Security Group`) en [`infra/terraform/aws`](infra/terraform/aws/README.md).
+- Operación de ambiente AWS documentada (start/stop/reboot de EC2 y reset de MySQL en Docker) en [guía operativa](DOCS/comandos-operacion-terraform-aws.md).
+- En el stack Terraform, MySQL no se expone por `3306` en el Security Group; la exposición pública está enfocada al puerto `8080` de la API.
 
 ## Alcance funcional implementado
 
@@ -61,6 +71,8 @@ Los comandos de ejecución se separaron en documentos dedicados:
 - [Comandos SQL](DOCS/comandos-sql.md)
 - [Ejecución manual (sin Docker)](DOCS/ejecucion-manual.md)
 - [Ejecución con Docker](DOCS/ejecucion-docker.md)
+- [Infraestructura AWS con Terraform](infra/terraform/aws/README.md)
+- [Operación Terraform AWS (start/stop/reboot/reset DB)](DOCS/comandos-operacion-terraform-aws.md)
 
 ## Ejecutar pruebas
 
