@@ -2,6 +2,12 @@
 
 Servicio backend para gestionar franquicias, sucursales y productos, incluyendo la consulta del producto con mayor stock por sucursal para una franquicia específica.
 
+## Guías de ejecución (inicio rápido)
+
+- [Comandos SQL](DOCS/comandos-sql.md)
+- [Ejecución manual (sin Docker)](DOCS/ejecucion-manual.md)
+- [Ejecución con Docker](DOCS/ejecucion-docker.md)
+
 ## Estado actual del proyecto
 
 Fecha de corte documentada: **25 de marzo de 2026**.
@@ -48,106 +54,11 @@ Se encuentran implementados los criterios funcionales del reto para gestión de 
 
 ## Despliegue rápido
 
-### Paso extra (solo si Flyway está desactivado): generar la base de datos con scripts SQL
+Los comandos de ejecución se separaron en documentos dedicados:
 
-**IMPORTANTE:** este paso manual aplica únicamente si `FRANQUICIAS_FLYWAY_ENABLED=false`.  
-Si `FRANQUICIAS_FLYWAY_ENABLED=true` (valor por default), Flyway ejecuta las migraciones automáticamente al iniciar la API.
-
-Cuando se haga manual, ejecuta las migraciones ubicadas en `src/main/resources/db/migration` respetando el orden por versión (`V1`, `V2`, ...).
-
-```bash
-ls -1 src/main/resources/db/migration/V*.sql
-```
-
-- La creación automática del esquema la hace **Flyway**, no JPA.
-- Por defecto, Flyway está activo con `FRANQUICIAS_FLYWAY_ENABLED=true` (default en `application.yml` y en `.env.template` para Docker).
-
-
-####  `.env` Y `.env.template`
-
-- `.env.template` es la **plantilla versionada** de variables de entorno.
-- `.env` es el archivo **local efectivo** que `docker compose` lee automáticamente al levantar servicios.
-- `.env` no debe versionarse en git (se ignora en `.gitignore`).
-- Flujo recomendado: copiar plantilla y editar valores locales.
-
-#### Opción A: MySQL local (manual)
-
-1. Crear base y usuario (si aún no existen):
-
-```bash
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS franquicias; CREATE USER IF NOT EXISTS 'franquicias_user'@'%' IDENTIFIED BY 'franquicias_pass'; GRANT ALL PRIVILEGES ON franquicias.* TO 'franquicias_user'@'%'; FLUSH PRIVILEGES;"
-```
-
-2. Ejecutar scripts en orden:
-
-```bash
-mysql -h 127.0.0.1 -P 3306 -u franquicias_user -p franquicias < src/main/resources/db/migration/V1__crear_esquema_inicial_franquicias.sql
-mysql -h 127.0.0.1 -P 3306 -u franquicias_user -p franquicias < src/main/resources/db/migration/V2__agregar_unicidad_nombres_franquicia_sucursal.sql
-```
-
-3. Verificar tablas creadas:
-
-```bash
-mysql -h 127.0.0.1 -P 3306 -u franquicias_user -p -D franquicias -e "SHOW TABLES;"
-```
-
-#### Opción B: MySQL en Docker (manual)
-
-1. Crear `.env` desde la plantilla y levantar solo MySQL:
-
-```bash
-cp .env.template .env
-docker compose up -d mysql
-```
-
-2. Ejecutar scripts en orden dentro del contenedor:
-
-```bash
-docker compose exec -T mysql sh -lc 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' < src/main/resources/db/migration/V1__crear_esquema_inicial_franquicias.sql
-docker compose exec -T mysql sh -lc 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' < src/main/resources/db/migration/V2__agregar_unicidad_nombres_franquicia_sucursal.sql
-```
-
-3. Verificar tablas creadas:
-
-```bash
-docker compose exec -T mysql sh -lc 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" -e "SHOW TABLES;"'
-```
-
-### Paso 2: iniciar la API
-
-Configuración recomendada según el flujo que elijas:
-
-- Si ya corriste los scripts manualmente, define `FRANQUICIAS_FLYWAY_ENABLED=false` para evitar que Flyway intente recrear objetos existentes.
-- Si no corriste scripts manuales, deja `FRANQUICIAS_FLYWAY_ENABLED=true` (valor por default) para que Flyway los ejecute automáticamente al iniciar la aplicación.
-
-### Local (sin Docker)
-
-1. Exportar variables de conexión:
-   - `FRANQUICIAS_DB_JDBC_URL`
-   - `FRANQUICIAS_DB_USERNAME`
-   - `FRANQUICIAS_DB_PASSWORD`
-   - `FRANQUICIAS_FLYWAY_ENABLED=true` (default)  
-     Si ya ejecutaste los `.sql` manualmente, usa `FRANQUICIAS_FLYWAY_ENABLED=false`.
-2. Ejecutar:
-
-```bash
-./mvnw spring-boot:run
-```
-
-### Con Docker
-
-1. En `.env`, dejar esta variable según el flujo:
-   - `FRANQUICIAS_FLYWAY_ENABLED=true` (default) para ejecución automática con Flyway.
-   - `FRANQUICIAS_FLYWAY_ENABLED=false` si ya ejecutaste los `.sql` manualmente.
-2. Levantar servicios:
-
-```bash
-docker compose up -d --build
-```
-
-3. Verificar:
-   - Swagger UI: `http://localhost:8080/swagger-ui.html`
-   - OpenAPI: `http://localhost:8080/v3/api-docs`
+- [Comandos SQL](DOCS/comandos-sql.md)
+- [Ejecución manual (sin Docker)](DOCS/ejecucion-manual.md)
+- [Ejecución con Docker](DOCS/ejecucion-docker.md)
 
 ## Ejecutar pruebas
 
@@ -174,9 +85,9 @@ Reportes generados por Maven Surefire:
 2. Importar ambas colecciones.
 3. En cada colección, validar variable `baseUrl=http://localhost:8080`.
 4. Ejecutar primero la colección de seed en este orden de carpetas:
-   - `01 - Seed Franquicias (10)`
+   - `01 - Seed Franquicias (2)`
    - `02 - Seed Sucursales (10)`
-   - `03 - Seed Productos (20)`
+   - `03 - Seed Productos (200)`
    - `04 - Actualizar Nombres (Nuevos Servicios)` (opcional)
 5. Luego usar la colección funcional `api-franquicias.postman_collection.json`.
 
@@ -232,13 +143,16 @@ Estas reglas están reforzadas en validaciones de entrada, lógica de aplicació
 
 - [Requerimientos y arquitectura](DOCS/01-requerimientos-y-arquitectura.md)
 - [Contrato API](DOCS/02-contrato-api.md)
+- [Comandos SQL](DOCS/comandos-sql.md)
+- [Ejecución manual (sin Docker)](DOCS/ejecucion-manual.md)
+- [Ejecución con Docker](DOCS/ejecucion-docker.md)
 - [Despliegue local y Docker](DOCS/05-despliegue-local-y-docker.md)
 - [Estado técnico y calidad](DOCS/estado-actual-y-calidad.md)
 
 ## Artefactos del proyecto
 
 - Colección Postman funcional: `postman/api-franquicias.postman_collection.json`
-- Colección Postman para carga de datos: `postman/APIFranquicias-SemillaDB2-10-200.postman_collection.json`
+- Colección Postman para carga de datos: `postman/api-franquicias-seed-10-10-20.postman_collection.json`
 - Migración base de esquema: `src/main/resources/db/migration/V1__crear_esquema_inicial_franquicias.sql`
 
 ## Brechas conocidas del estado actual
