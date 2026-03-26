@@ -1,0 +1,22 @@
+# Región de despliegue AWS.
+aws_region = "us-east-1"
+
+# Nombre base para tags y recursos.
+project_name = "api-franquicias"
+environment  = "dev"
+
+# Instancia solicitada para la prueba.
+instance_name = "api-franquicias-ec2"
+instance_type = "t3.small"
+
+# Nombre del key pair que Terraform creará automáticamente.
+key_pair_name = "api-franquicias-key-20260325"
+
+# Debe ser tu IP pública actual en formato /32.
+allowed_ssh_cidr = "190.10.20.30/32"
+
+# API pública por 8080. Puedes restringirlo a una red específica si deseas.
+allowed_api_cidrs = ["0.0.0.0/0"]
+
+# Disco raíz de la instancia.
+root_volume_size = 20
