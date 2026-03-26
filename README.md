@@ -12,7 +12,7 @@ Fecha de corte documentada: **25 de marzo de 2026**.
 - Migraciones versionadas con `Flyway`.
 - Contrato OpenAPI publicado con `springdoc-openapi`.
 - Logging estructurado con separación por categorías (`backend-api`, `db`, `error`).
-- Suite de pruebas verificada en esta fecha: **45 pruebas, 0 fallas, 0 errores**.
+- Suite de pruebas verificada : **45 pruebas, 0 fallas, 0 errores**.
 
 ## Alcance funcional implementado
 
@@ -59,14 +59,11 @@ Cuando se haga manual, ejecuta las migraciones ubicadas en `src/main/resources/d
 ls -1 src/main/resources/db/migration/V*.sql
 ```
 
-#### Aclaración clave: ¿JPA crea las tablas?
-
-- **No.** En este proyecto JPA está configurado con `spring.jpa.hibernate.ddl-auto=validate`, por lo que **solo valida** el esquema existente y no crea tablas.
 - La creación automática del esquema la hace **Flyway**, no JPA.
 - Por defecto, Flyway está activo con `FRANQUICIAS_FLYWAY_ENABLED=true` (default en `application.yml` y en `.env.template` para Docker).
-- En este README se prioriza ejecutarlo manualmente como primer paso para tener control explícito del proceso.
 
-#### Aclaración clave: `.env` vs `.env.template`
+
+####  `.env` Y `.env.template`
 
 - `.env.template` es la **plantilla versionada** de variables de entorno.
 - `.env` es el archivo **local efectivo** que `docker compose` lee automáticamente al levantar servicios.
@@ -204,7 +201,7 @@ El proyecto está organizado por contexto funcional (`franquicia`, `sucursal`, `
 Decisión técnica relevante:
 
 - La entrada HTTP es reactiva (`Mono` en controladores y servicios).
-- Como JPA es bloqueante, las operaciones de persistencia se encapsulan en `Schedulers.boundedElastic()` para evitar bloquear el event loop de WebFlux.
+- Operaciones de persistencia se encapsulan en `Schedulers.boundedElastic()` para evitar bloquear el event loop de WebFlux.
 
 ## Reglas funcionales y de consistencia
 
@@ -241,7 +238,7 @@ Estas reglas están reforzadas en validaciones de entrada, lógica de aplicació
 ## Artefactos del proyecto
 
 - Colección Postman funcional: `postman/api-franquicias.postman_collection.json`
-- Colección Postman para carga de datos: `postman/api-franquicias-seed-10-10-20.postman_collection.json`
+- Colección Postman para carga de datos: `postman/APIFranquicias-SemillaDB2-10-200.postman_collection.json`
 - Migración base de esquema: `src/main/resources/db/migration/V1__crear_esquema_inicial_franquicias.sql`
 
 ## Brechas conocidas del estado actual
