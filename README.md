@@ -7,6 +7,8 @@ Servicio backend para gestionar franquicias, sucursales y productos, incluyendo 
 - [Comandos SQL](DOCS/comandos-sql.md)
 - [Ejecución manual (sin Docker)](DOCS/ejecucion-manual.md)
 - [Ejecución con Docker](DOCS/ejecucion-docker.md)
+- [Infraestructura AWS con Terraform](infra/terraform/aws/README.md)
+- [Operación Terraform AWS (start/stop/reboot/reset DB)](DOCS/comandos-operacion-terraform-aws.md)
 
 ## Estado actual del proyecto
 
@@ -146,6 +148,8 @@ Estas reglas están reforzadas en validaciones de entrada, lógica de aplicació
 - [Comandos SQL](DOCS/comandos-sql.md)
 - [Ejecución manual (sin Docker)](DOCS/ejecucion-manual.md)
 - [Ejecución con Docker](DOCS/ejecucion-docker.md)
+- [Infraestructura AWS con Terraform](infra/terraform/aws/README.md)
+- [Operación Terraform AWS (start/stop/reboot/reset DB)](DOCS/comandos-operacion-terraform-aws.md)
 - [Despliegue local y Docker](DOCS/05-despliegue-local-y-docker.md)
 - [Estado técnico y calidad](DOCS/estado-actual-y-calidad.md)
 
